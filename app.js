@@ -1,7 +1,9 @@
 // 1. Inițializăm harta
-const map = L.map('map').setView([45.9, 24.9], 7);
+const map = L.map('map', {
+  zoomControl: true
+}).setView([45.9, 24.9], 7);
 
-// Variabile layer
+// Layer-e
 let layerJudete;
 let layerUAT;
 
@@ -15,7 +17,7 @@ backBtn.onclick = () => {
   backBtn.style.display = 'none';
 };
 
-// 2. Încărcăm GeoJSON județe
+// === JUDEȚE ===
 fetch('judete.geojson')
   .then(r => r.json())
   .then(data => {
@@ -25,25 +27,38 @@ fetch('judete.geojson')
       style: {
         color: '#333',
         weight: 1,
-        fillColor: '#7fbfff',
+        fillColor: '#6fa8dc',
         fillOpacity: 0.7
       },
 
       onEachFeature: (feature, layer) => {
 
-        // tooltip discret
-        layer.bindTooltip(feature.properties.Judet, { sticky: true });
+        // LABEL PERMANENT JUDEȚ
+        layer.bindTooltip(
+          feature.properties.Judet,
+          {
+            permanent: true,
+            direction: 'center',
+            className: 'label-judet'
+          }
+        );
 
-        // hover highlight
+        // HOVER JUDEȚ
         layer.on('mouseover', () => {
-          layer.setStyle({ fillOpacity: 0.9 });
+          layer.setStyle({
+            fillColor: '#3d85c6',
+            fillOpacity: 0.9
+          });
         });
 
         layer.on('mouseout', () => {
-          layer.setStyle({ fillOpacity: 0.7 });
+          layer.setStyle({
+            fillColor: '#6fa8dc',
+            fillOpacity: 0.7
+          });
         });
 
-        // click județ
+        // CLICK JUDEȚ
         layer.on('click', () => {
           map.fitBounds(layer.getBounds());
           afiseazaUAT(feature.properties.Judet);
@@ -55,6 +70,8 @@ fetch('judete.geojson')
 
   });
 
+
+// === UAT ===
 function afiseazaUAT(judetSelectat) {
 
   if (layerJudete) map.removeLayer(layerJudete);
@@ -71,25 +88,38 @@ function afiseazaUAT(judetSelectat) {
         style: {
           color: '#666',
           weight: 0.6,
-          fillColor: '#ffd699',
+          fillColor: '#ffe599',
           fillOpacity: 0.75
         },
 
         onEachFeature: (feature, layer) => {
 
-          // tooltip UAT
-          layer.bindTooltip(feature.properties.UAT, { sticky: true });
+          // LABEL PERMANENT UAT
+          layer.bindTooltip(
+            feature.properties.UAT,
+            {
+              permanent: true,
+              direction: 'center',
+              className: 'label-uat'
+            }
+          );
 
-          // hover
+          // HOVER UAT
           layer.on('mouseover', () => {
-            layer.setStyle({ fillOpacity: 0.95 });
+            layer.setStyle({
+              fillColor: '#f1c232',
+              fillOpacity: 0.95
+            });
           });
 
           layer.on('mouseout', () => {
-            layer.setStyle({ fillOpacity: 0.75 });
+            layer.setStyle({
+              fillColor: '#ffe599',
+              fillOpacity: 0.75
+            });
           });
 
-          // click UAT → redirect
+          // CLICK → URL
           layer.on('click', () => {
             window.location.href = feature.properties.URL;
           });
@@ -101,5 +131,4 @@ function afiseazaUAT(judetSelectat) {
       backBtn.style.display = 'block';
 
     });
-
 }
