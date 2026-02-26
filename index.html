@@ -9,33 +9,59 @@
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
   <style>
-    #map { height: 100vh; }
+    /* HARTA */
+    #map {
+      height: 100vh;
+    }
+
+    /* BUTON INAPOI */
+    #backBtn {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 1000;
+      padding: 6px 12px;
+      background: white;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      display: none;
+      font-family: Arial, sans-serif;
+    }
+
+    #backBtn:hover {
+      background: #f2f2f2;
+    }
+
+    /* LABEL JUDEȚ */
+    .label-judet {
+      font-size: 11px;
+      font-weight: bold;
+      color: #1c4587;
+      text-align: center;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      pointer-events: none;
+    }
+
+    /* LABEL UAT */
+    .label-uat {
+      font-size: 9px;
+      color: #7f6000;
+      text-align: center;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      pointer-events: none;
+    }
   </style>
 </head>
+
 <body>
 
-<div id="map"></div>
+  <div id="map"></div>
   <button id="backBtn">Înapoi la județe</button>
 
-<style>
-#backBtn {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 1000;
-  padding: 6px 12px;
-  background: white;
-  border: 1px solid #ccc;
-  cursor: pointer;
-  display: none;
-  font-family: Arial, sans-serif;
-}
-#backBtn:hover {
-  background: #f2f2f2;
-}
-</style>
-
-<script src="app.js"></script>
+  <script src="app.js"></script>
 </body>
-
 </html>
