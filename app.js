@@ -1,4 +1,8 @@
+// ===============================
+// FUNCȚIE NORMALIZARE TEXT
+// ===============================
 function norm(txt) {
+  if (!txt) return '';
   return txt
     .toString()
     .trim()
@@ -6,23 +10,37 @@ function norm(txt) {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
 }
-// Inițializare hartă
+
+// ===============================
+// INIȚIALIZARE HARTĂ
+// ===============================
 const map = L.map('map').setView([45.9, 24.9], 7);
 
-let layerJudete;
-let layerUAT;
+let layerJudete = null;
+let layerUAT = null;
 
 const backBtn = document.getElementById('backBtn');
 
-// === RESET LA JUDEȚE ===
+// ===============================
+// BUTON ÎNAPOI
+// ===============================
 backBtn.onclick = () => {
-  if (layerUAT) map.removeLayer(layerUAT);
-  if (layerJudete) layerJudete.addTo(map);
+  if (layerUAT) {
+    map.removeLayer(layerUAT);
+    layerUAT = null;
+  }
+
+  if (layerJudete) {
+    layerJudete.addTo(map);
+  }
+
   map.setView([45.9, 24.9], 7);
   backBtn.style.display = 'none';
 };
 
-// === JUDEȚE ===
+// ===============================
+// JUDEȚE
+// ===============================
 fetch('judete.geojson')
   .then(r => r.json())
   .then(data => {
@@ -44,7 +62,7 @@ fetch('judete.geojson')
           className: 'label-judet'
         });
 
-        // HOVER ANIMAT
+        // HOVER
         layer.on('mouseover', () => {
           layer.setStyle({
             fillOpacity: 1,
@@ -66,13 +84,25 @@ fetch('judete.geojson')
         });
       }
     }).addTo(map);
+
+  })
+  .catch(err => {
+    console.error('Eroare la încărcarea județelor:', err);
   });
 
-// === UAT ===
+// ===============================
+// UAT
+// ===============================
 function afiseazaUAT(judetSelectat) {
 
-  if (layerJudete) map.removeLayer(layerJudete);
-  if (layerUAT) map.removeLayer(layerUAT);
+  if (layerJudete) {
+    map.removeLayer(layerJudete);
+  }
+
+  if (layerUAT) {
+    map.removeLayer(layerUAT);
+    layerUAT = null;
+  }
 
   fetch('uat.geojson')
     .then(r => r.json())
@@ -82,22 +112,20 @@ function afiseazaUAT(judetSelectat) {
         filter: f => norm(f.properties.Judet) === norm(judetSelectat),
 
         style: {
-  color: '#000',      // CONTUR NEGRU
-  weight: 0.7,
-  fillColor: '#ffe599',
-  fillOpacity: 0.85
-},
+          color: '#000',        // CONTUR NEGRU
+          weight: 0.7,
+          fillColor: '#ffe599',
+          fillOpacity: 0.85
+        },
 
         onEachFeature: (feature, layer) => {
 
-          // LABEL UAT (inițial ascuns)
-          const tooltip = layer.bindTooltip(feature.properties.UAT, {
+          // LABEL UAT (permanent, dar controlat din zoom)
+          layer.bindTooltip(feature.properties.UAT, {
             permanent: true,
             direction: 'center',
             className: 'label-uat'
           });
-
-          tooltip.remove(); // ASCUNS LA ZOOM MIC
 
           // HOVER
           layer.on('mouseover', () => {
@@ -116,22 +144,43 @@ function afiseazaUAT(judetSelectat) {
 
           // CLICK → URL
           layer.on('click', () => {
-            window.location.href = feature.properties.URL;
-          });
-
-          // ZOOMEND → afișăm label doar la zoom mare
-          map.on('zoomend', () => {
-            if (map.getZoom() >= 9) {
-              tooltip.addTo(map);
-            } else {
-              tooltip.remove();
+            if (feature.properties.URL) {
+              window.location.href = feature.properties.URL;
             }
           });
         }
       }).addTo(map);
 
       backBtn.style.display = 'block';
+
+      // === CONTROL LABEL UAT LA ZOOM ===
+      toggleUATLabels();
+    })
+    .catch(err => {
+      console.error('Eroare la încărcarea UAT:', err);
     });
 }
 
+// ===============================
+// ZOOMEND – CONTROL LABEL UAT
+// ===============================
+map.on('zoomend', () => {
+  toggleUATLabels();
+});
 
+function toggleUATLabels() {
+  if (!layerUAT) return;
+
+  const show = map.getZoom() >= 9;
+
+  layerUAT.eachLayer(layer => {
+    const tooltip = layer.getTooltip();
+    if (!tooltip) return;
+
+    if (show) {
+      layer.openTooltip();
+    } else {
+      layer.closeTooltip();
+    }
+  });
+}
