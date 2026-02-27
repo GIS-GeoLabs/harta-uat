@@ -79,7 +79,7 @@ function afiseazaUAT(judetSelectat) {
     .then(data => {
 
       layerUAT = L.geoJSON(data, {
-        filter: f => norm(f.properties.Judet) === norm(judetSelectat)
+        filter: f => norm(f.properties.Judet) === norm(judetSelectat),
 
         style: {
   color: '#000',      // CONTUR NEGRU
@@ -133,4 +133,5 @@ function afiseazaUAT(judetSelectat) {
       backBtn.style.display = 'block';
     });
 }
+
 
