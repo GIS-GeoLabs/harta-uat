@@ -13,12 +13,16 @@ const map = L.map('map').setView([45.9, 24.9], 7);
 
 let layerJudete = null;
 let layerUAT = null;
+let uatLabels = [];
 
 const backBtn = document.getElementById('backBtn');
 
 // ================== RESET ==================
 backBtn.onclick = () => {
   if (layerUAT) map.removeLayer(layerUAT);
+  uatLabels.forEach(l => map.removeLayer(l));
+  uatLabels = [];
+
   if (layerJudete) layerJudete.addTo(map);
 
   map.setView([45.9, 24.9], 7);
@@ -32,7 +36,7 @@ fetch('judete.geojson')
 
     layerJudete = L.geoJSON(data, {
       style: {
-        color: '#ffffff',      // contur alb
+        color: '#ffffff',
         weight: 1.2,
         fillColor: '#6fa8dc',
         fillOpacity: 0.9
@@ -40,30 +44,23 @@ fetch('judete.geojson')
 
       onEachFeature: (feature, layer) => {
 
-        // LABEL JUDEȚ – CENTRAT
+        // LABEL JUDEȚ (CENTRU REAL)
         layer.bindTooltip(feature.properties.Judet, {
           permanent: true,
           direction: 'center',
-          className: 'label-judet',
-          opacity: 1
+          className: 'label-judet'
         });
 
         // HOVER
         layer.on('mouseover', () => {
-          layer.setStyle({
-            fillColor: '#3d85c6',
-            weight: 2
-          });
+          layer.setStyle({ fillColor: '#3d85c6', weight: 2 });
         });
 
         layer.on('mouseout', () => {
-          layer.setStyle({
-            fillColor: '#6fa8dc',
-            weight: 1.2
-          });
+          layer.setStyle({ fillColor: '#6fa8dc', weight: 1.2 });
         });
 
-        // CLICK → UAT
+        // CLICK
         layer.on('click', () => {
           map.fitBounds(layer.getBounds(), { padding: [20, 20] });
           afiseazaUAT(feature.properties.Judet);
@@ -78,16 +75,18 @@ function afiseazaUAT(judetSelectat) {
   if (layerJudete) map.removeLayer(layerJudete);
   if (layerUAT) map.removeLayer(layerUAT);
 
+  uatLabels.forEach(l => map.removeLayer(l));
+  uatLabels = [];
+
   fetch('uat.geojson')
     .then(r => r.json())
     .then(data => {
 
       layerUAT = L.geoJSON(data, {
-        filter: f =>
-          norm(f.properties.Judet) === norm(judetSelectat),
+        filter: f => norm(f.properties.Judet) === norm(judetSelectat),
 
         style: {
-          color: '#000000',     // contur negru
+          color: '#000',
           weight: 0.8,
           fillColor: '#ffe599',
           fillOpacity: 0.9
@@ -95,28 +94,29 @@ function afiseazaUAT(judetSelectat) {
 
         onEachFeature: (feature, layer) => {
 
-          // LABEL UAT – SUS, POATE IEȘI DIN POLIGON
-          layer.bindTooltip(feature.properties.UAT, {
+          // === CALCUL CENTRU STABIL (getBounds) ===
+          const center = layer.getBounds().getCenter();
+
+          const label = L.tooltip({
             permanent: true,
             direction: 'top',
             offset: [0, -6],
-            className: 'label-uat',
-            opacity: 1
-          });
+            className: 'label-uat'
+          })
+          .setContent(feature.properties.UAT)
+          .setLatLng(center);
 
-          // HOVER
+          uatLabels.push(label);
+
+          // === HOVER POLIGON ===
           layer.on('mouseover', () => {
-            layer.setStyle({
-              fillColor: '#f1c232',
-              weight: 1.2
-            });
+            layer.setStyle({ fillColor: '#f1c232', weight: 1.2 });
+            label.getElement()?.classList.add('label-hover');
           });
 
           layer.on('mouseout', () => {
-            layer.setStyle({
-              fillColor: '#ffe599',
-              weight: 0.8
-            });
+            layer.setStyle({ fillColor: '#ffe599', weight: 0.8 });
+            label.getElement()?.classList.remove('label-hover');
           });
 
           // CLICK → URL
@@ -128,6 +128,25 @@ function afiseazaUAT(judetSelectat) {
         }
       }).addTo(map);
 
+      updateUATLabels();
+      map.on('zoomend moveend', updateUATLabels);
+
       backBtn.style.display = 'block';
     });
+}
+
+// ================== LOGICĂ LABEL UAT ==================
+function updateUATLabels() {
+  const zoom = map.getZoom();
+
+  uatLabels.forEach(label => {
+    const px = map.latLngToContainerPoint(label.getLatLng());
+
+    // criteriu simplu: zoom + poziție în ecran
+    if (zoom >= 9 && px.x > 0 && px.y > 0) {
+      if (!map.hasLayer(label)) label.addTo(map);
+    } else {
+      if (map.hasLayer(label)) map.removeLayer(label);
+    }
+  });
 }
