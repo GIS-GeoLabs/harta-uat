@@ -1,59 +1,25 @@
-// ================== UTILS ==================
 function norm(txt) {
   var s = txt.toString().trim().toUpperCase().normalize("NFD");
   var result = '';
   for (var i = 0; i < s.length; i++) {
     var code = s.charCodeAt(i);
-    if (code < 768 || code > 879) {
-      result += s[i];
-    }
+    if (code < 768 || code > 879) result += s[i];
   }
   return result;
 }
 
-function formatUATName(name) {
-  if (!name) return '';
-  if (name.length <= 10) return name;
-  var mid = Math.floor(name.length / 2);
-  var left = name.lastIndexOf(' ', mid);
-  var right = name.indexOf(' ', mid);
-  var splitAt = -1;
-  if (left === -1 && right === -1) return name;
-  if (left === -1) splitAt = right;
-  else if (right === -1) splitAt = left;
-  else splitAt = (mid - left <= right - mid) ? left : right;
-  return name.substring(0, splitAt) + '<br>' + name.substring(splitAt + 1);
-}
-
 function getLargestPolygonRings(coords) {
-  var best = null;
-  var maxArea = -1;
+  var best = null, maxArea = -1;
   for (var i = 0; i < coords.length; i++) {
-    var ring = coords[i][0];
-    var area = 0;
+    var ring = coords[i][0], area = 0;
     for (var j = 0; j < ring.length - 1; j++) {
       area += ring[j][0] * ring[j + 1][1];
       area -= ring[j + 1][0] * ring[j][1];
     }
     area = Math.abs(area / 2);
-    if (area > maxArea) {
-      maxArea = area;
-      best = coords[i];
-    }
+    if (area > maxArea) { maxArea = area; best = coords[i]; }
   }
   return best;
-}
-
-function pointInRing(pt, ring) {
-  var x = pt[0], y = pt[1], inside = false;
-  for (var i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-    var xi = ring[i][0], yi = ring[i][1];
-    var xj = ring[j][0], yj = ring[j][1];
-    if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
-      inside = !inside;
-    }
-  }
-  return inside;
 }
 
 function getLabelLatLng(feature, layer) {
@@ -64,17 +30,14 @@ function getLabelLatLng(feature, layer) {
     rings = getLargestPolygonRings(feature.geometry.coordinates);
   }
   if (!rings) return layer.getBounds().getCenter();
-
   try {
     var pt = polylabel(rings, 0.0001);
     return L.latLng(pt[1], pt[0]);
   } catch (e) {
-    console.warn('polylabel error:', feature.properties.UAT, e);
     return layer.getBounds().getCenter();
   }
 }
 
-// ================== MAP ==================
 var map = L.map('map').setView([45.9, 24.9], 7);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -87,54 +50,37 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
 var MIN_UAT_LABEL_ZOOM = 10;
 map.on('zoomend', function() {
-  var container = map.getContainer();
+  var c = map.getContainer();
   if (map.getZoom() >= MIN_UAT_LABEL_ZOOM) {
-    container.classList.remove('labels-hidden');
+    c.classList.remove('labels-hidden');
   } else {
-    container.classList.add('labels-hidden');
+    c.classList.add('labels-hidden');
   }
 });
 
-var layerJudete = null;
-var layerUAT = null;
-var uatLabels = [];
+var layerJudete = null, layerUAT = null, uatLabels = [];
 var backBtn = document.getElementById('backBtn');
 
-// ================== RESET ==================
 backBtn.onclick = function() {
   if (layerUAT) map.removeLayer(layerUAT);
-  for (var i = 0; i < uatLabels.length; i++) {
-    map.removeLayer(uatLabels[i]);
-  }
+  for (var i = 0; i < uatLabels.length; i++) map.removeLayer(uatLabels[i]);
   uatLabels = [];
   if (layerJudete) layerJudete.addTo(map);
   map.setView([45.9, 24.9], 7);
   backBtn.style.display = 'none';
 };
 
-// ================== JUDEȚE ==================
 fetch('judete.geojson')
   .then(function(r) { return r.json(); })
   .then(function(data) {
     layerJudete = L.geoJSON(data, {
-      style: {
-        color: '#ffffff',
-        weight: 1.3,
-        fillColor: '#6fa8dc',
-        fillOpacity: 0.9
-      },
+      style: { color: '#ffffff', weight: 1.3, fillColor: '#6fa8dc', fillOpacity: 0.9 },
       onEachFeature: function(feature, layer) {
         layer.bindTooltip(feature.properties.Judet, {
-          permanent: true,
-          direction: 'center',
-          className: 'label-judet'
+          permanent: true, direction: 'center', className: 'label-judet'
         });
-        layer.on('mouseover', function() {
-          layer.setStyle({ fillColor: '#3d85c6' });
-        });
-        layer.on('mouseout', function() {
-          layer.setStyle({ fillColor: '#6fa8dc' });
-        });
+        layer.on('mouseover', function() { layer.setStyle({ fillColor: '#3d85c6' }); });
+        layer.on('mouseout',  function() { layer.setStyle({ fillColor: '#6fa8dc' }); });
         layer.on('click', function() {
           map.fitBounds(layer.getBounds(), { padding: [20, 20] });
           afiseazaUAT(feature.properties.Judet);
@@ -143,13 +89,10 @@ fetch('judete.geojson')
     }).addTo(map);
   });
 
-// ================== UAT ==================
 function afiseazaUAT(judetSelectat) {
   if (layerJudete) map.removeLayer(layerJudete);
   if (layerUAT) map.removeLayer(layerUAT);
-  for (var i = 0; i < uatLabels.length; i++) {
-    map.removeLayer(uatLabels[i]);
-  }
+  for (var i = 0; i < uatLabels.length; i++) map.removeLayer(uatLabels[i]);
   uatLabels = [];
 
   fetch('uat.geojson')
@@ -162,42 +105,31 @@ function afiseazaUAT(judetSelectat) {
         filter: function(f) {
           return norm(f.properties.Judet) === norm(judetSelectat);
         },
-        style: {
-          color: '#000',
-          weight: 0.8,
-          fillColor: '#ffe599',
-          fillOpacity: 0.9
-        },
+        style: { color: '#000', weight: 0.8, fillColor: '#ffe599', fillOpacity: 0.9 },
         onEachFeature: function(feature, layer) {
-          var labelLatLng = getLabelLatLng(feature, layer);
+          var latlng = getLabelLatLng(feature, layer);
 
-          var label = L.marker(labelLatLng, {
-            icon: L.divIcon({
-              className: 'uat-marker-container',
-              html: '<span class="label-uat">' + formatUATName(feature.properties.UAT) + '</span>',
-              iconSize: [0, 0],
-              iconAnchor: [0, 0]
-            }),
-            interactive: false,
-            keyboard: false
-          }).addTo(map);
+          var label = L.tooltip({
+            permanent: true,
+            direction: 'center',
+            className: 'label-uat'
+          })
+            .setContent(feature.properties.UAT)
+            .setLatLng(latlng)
+            .addTo(map);
 
           uatLabels.push(label);
 
           layer.on('mouseover', function() {
             layer.setStyle({ fillColor: '#f1c232' });
-            var el = label.getElement();
-            if (el) el.querySelector('.label-uat').classList.add('label-hover');
+            if (label.getElement()) label.getElement().classList.add('label-hover');
           });
           layer.on('mouseout', function() {
             layer.setStyle({ fillColor: '#ffe599' });
-            var el = label.getElement();
-            if (el) el.querySelector('.label-uat').classList.remove('label-hover');
+            if (label.getElement()) label.getElement().classList.remove('label-hover');
           });
           layer.on('click', function() {
-            if (feature.properties.URL) {
-              window.open(feature.properties.URL, '_blank');
-            }
+            if (feature.properties.URL) window.open(feature.properties.URL, '_blank');
           });
         }
       }).addTo(map);
