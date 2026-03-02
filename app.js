@@ -1,7 +1,14 @@
 // ================== UTILS ==================
 function norm(txt) {
-  return txt.toString().trim().toUpperCase()
-    .normalize("NFD").replace(/\p{Mn}/gu, "");
+  var s = txt.toString().trim().toUpperCase().normalize("NFD");
+  var result = '';
+  for (var i = 0; i < s.length; i++) {
+    var code = s.charCodeAt(i);
+    if (code < 768 || code > 879) {
+      result += s[i];
+    }
+  }
+  return result;
 }
 
 function formatUATName(name) {
@@ -59,7 +66,6 @@ function getLabelLatLng(feature, layer) {
   if (!rings) return layer.getBounds().getCenter();
 
   try {
-    // centroidul vizual întâi — mai bun pentru forme alungite
     var ring = rings[0];
     var cx = 0, cy = 0, n = ring.length - 1;
     for (var k = 0; k < n; k++) { cx += ring[k][0]; cy += ring[k][1]; }
@@ -69,7 +75,6 @@ function getLabelLatLng(feature, layer) {
       return L.latLng(centroid[1], centroid[0]);
     }
 
-    // centroid în afara poligonului (formă concavă) → polylabel
     var pt = polylabel(rings, 0.0001);
     return L.latLng(pt[1], pt[0]);
 
