@@ -37,58 +37,6 @@ function getLargestPolygonRings(coords) {
   return best;
 }
 
-function getLabelLatLng(feature, layer) {
-  try {
-    var rings = null;
-    if (feature.geometry.type === 'Polygon') {
-      rings = feature.geometry.coordinates;
-    } else if (feature.geometry.type === 'MultiPolygon') {
-      rings = getLargestPolygonRings(feature.geometry.coordinates);
-    }
-
-    if (rings) {
-      var pt = polylabel(rings, 0.0001);
-
-      // dacă raza e prea mică = poligon îngust/alungit → nu folosi polylabel
-      if (pt.distance && pt.distance > 0.005) {
-        return L.latLng(pt[1], pt[0]);
-      }
-    }
-  } catch (e) {
-    console.warn('polylabel error:', feature.properties.UAT);
-  }
-
-  // fallback pentru poligoane înguste: centrul bbox-ului
-  // bbox center e mai stabil vizual pe forme alungite decât centroidul aritmetic
-  try {
-    var bounds = layer.getBounds();
-    var latMid = (bounds.getNorth() + bounds.getSouth()) / 2;
-    var lngMid = (bounds.getEast() + bounds.getWest()) / 2;
-
-    // verifică dacă punctul bbox e în interiorul poligonului
-    // dacă nu, ia polylabel oricum (mai bun decât nimic)
-    var rings2 = null;
-    if (feature.geometry.type === 'Polygon') {
-      rings2 = feature.geometry.coordinates;
-    } else if (feature.geometry.type === 'MultiPolygon') {
-      rings2 = getLargestPolygonRings(feature.geometry.coordinates);
-    }
-
-    if (rings2 && pointInRing([lngMid, latMid], rings2[0])) {
-      return L.latLng(latMid, lngMid);
-    }
-
-    // bbox nu e în poligon → forțează polylabel indiferent de distanță
-    if (rings2) {
-      var pt2 = polylabel(rings2, 0.0001);
-      return L.latLng(pt2[1], pt2[0]);
-    }
-  } catch (e2) {}
-
-  return layer.getBounds().getCenter();
-}
-
-// helper: punct în inel exterior
 function pointInRing(pt, ring) {
   var x = pt[0], y = pt[1];
   var inside = false;
@@ -102,6 +50,45 @@ function pointInRing(pt, ring) {
   return inside;
 }
 
+function getLabelLatLng(feature, layer) {
+  var rings = null;
+  if (feature.geometry.type === 'Polygon') {
+    rings = feature.geometry.coordinates;
+  } else if (feature.geometry.type === 'MultiPolygon') {
+    rings = getLargestPolygonRings(feature.geometry.coordinates);
+  }
+
+  if (!rings) return layer.getBounds().getCenter();
+
+  try {
+    var pt = polylabel(rings, 0.0001);
+    var bounds = layer.getBounds();
+    var bboxW = bounds.getEast() - bounds.getWest();
+    var bboxH = bounds.getNorth() - bounds.getSouth();
+    var minDim = Math.min(bboxW, bboxH);
+
+    // poligon lat (normal) → polylabel e fiabil
+    if (minDim > 0.01) {
+      return L.latLng(pt[1], pt[0]);
+    }
+
+    // poligon îngust/alungit → încearcă centrul bbox
+    var latMid = (bounds.getNorth() + bounds.getSouth()) / 2;
+    var lngMid = (bounds.getEast() + bounds.getWest()) / 2;
+
+    if (pointInRing([lngMid, latMid], rings[0])) {
+      return L.latLng(latMid, lngMid);
+    }
+
+    // centrul bbox nu e în poligon → polylabel e oricum cel mai bun
+    return L.latLng(pt[1], pt[0]);
+
+  } catch (e) {
+    console.warn('polylabel error:', feature.properties.UAT);
+    return layer.getBounds().getCenter();
+  }
+}
+
 // ================== MAP ==================
 var map = L.map('map').setView([45.9, 24.9], 7);
 
@@ -113,7 +100,6 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   keepBuffer: 2
 }).addTo(map);
 
-// ascunde labeluri UAT sub zoom 10
 var MIN_UAT_LABEL_ZOOM = 10;
 map.on('zoomend', function() {
   var container = map.getContainer();
@@ -236,4 +222,3 @@ function afiseazaUAT(judetSelectat) {
       backBtn.style.display = 'block';
     });
 }
-
