@@ -70,11 +70,9 @@ function pointInRing(pt, ring) {
 }
 
 function getLabelLatLng(feature, layer) {
-  // coordonate manuale în GeoJSON → prioritate maximă
   if (feature.properties.LabelLat && feature.properties.LabelLng) {
     return L.latLng(feature.properties.LabelLat, feature.properties.LabelLng);
   }
-
   var rings = null;
   if (feature.geometry.type === 'Polygon') {
     rings = feature.geometry.coordinates;
@@ -82,12 +80,9 @@ function getLabelLatLng(feature, layer) {
     rings = getLargestPolygonRings(feature.geometry.coordinates);
   }
   if (!rings) return layer.getBounds().getCenter();
-
   var ring = rings[0];
   var c = ringCentroid(ring);
-
   if (pointInRing(c, ring)) return L.latLng(c[1], c[0]);
-
   var cx = 0, cy = 0, n = ring.length - 1;
   for (var k = 0; k < n; k++) { cx += ring[k][0]; cy += ring[k][1]; }
   return L.latLng(cy / n, cx / n);
@@ -105,7 +100,10 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 }).addTo(map);
 
 var MIN_UAT_LABEL_ZOOM = 10;
+var uatActive = false; // ← FLAG
+
 map.on('zoomend', function() {
+  if (uatActive) return; // ← când UAT e activ, zoomend nu ascunde nimic
   var c = map.getContainer();
   if (map.getZoom() >= MIN_UAT_LABEL_ZOOM) {
     c.classList.remove('labels-hidden');
@@ -119,6 +117,7 @@ var backBtn = document.getElementById('backBtn');
 
 // ================== RESET ==================
 backBtn.onclick = function() {
+  uatActive = false; // ← reset flag
   if (layerUAT) map.removeLayer(layerUAT);
   for (var i = 0; i < uatLabels.length; i++) map.removeLayer(uatLabels[i]);
   uatLabels = [];
@@ -150,6 +149,7 @@ fetch('judete.geojson')
 
 // ================== UAT ==================
 function afiseazaUAT(judetSelectat) {
+  uatActive = true; // ← activează flag înainte de fetch
   if (layerJudete) map.removeLayer(layerJudete);
   if (layerUAT) map.removeLayer(layerUAT);
   for (var i = 0; i < uatLabels.length; i++) map.removeLayer(uatLabels[i]);
@@ -199,6 +199,6 @@ function afiseazaUAT(judetSelectat) {
       }).addTo(map);
 
       backBtn.style.display = 'block';
-      map.getContainer().classList.remove('labels-hidden');
+      map.getContainer().classList.remove('labels-hidden'); // ← mereu vizibile când UAT activ
     });
 }
