@@ -8,20 +8,22 @@ function norm(txt) {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
-// ================== MAP INIT ==================
-const map = L.map('map', {
-  zoomSnap: 0.25
-}).setView([45.9, 24.9], 7);
+// ================== MAP ==================
+const map = L.map('map').setView([45.9, 24.9], 7);
 
-let layerJudete;
-let layerUAT;
+let layerJudete = null;
+let layerUAT = null;
 let uatLabels = [];
 
 const backBtn = document.getElementById('backBtn');
 
 // ================== RESET ==================
 backBtn.onclick = () => {
-  if (layerUAT) map.removeLayer(layerUAT);
+  if (layerUAT) {
+    map.removeLayer(layerUAT);
+    layerUAT = null;
+  }
+
   uatLabels.forEach(l => map.removeLayer(l));
   uatLabels = [];
 
@@ -38,7 +40,7 @@ fetch('judete.geojson')
 
     layerJudete = L.geoJSON(data, {
       style: {
-        color: '#ffffff',      // contur alb
+        color: '#ffffff',
         weight: 1.3,
         fillColor: '#6fa8dc',
         fillOpacity: 0.9
@@ -46,29 +48,21 @@ fetch('judete.geojson')
 
       onEachFeature: (feature, layer) => {
 
-        // LABEL JUDEȚ – simplu, negru
+        // LABEL JUDEȚ
         layer.bindTooltip(feature.properties.Judet, {
           permanent: true,
           direction: 'center',
           className: 'label-judet'
         });
 
-        // HOVER
         layer.on('mouseover', () => {
-          layer.setStyle({
-            fillColor: '#3d85c6',
-            weight: 2
-          });
+          layer.setStyle({ fillColor: '#3d85c6' });
         });
 
         layer.on('mouseout', () => {
-          layer.setStyle({
-            fillColor: '#6fa8dc',
-            weight: 1.3
-          });
+          layer.setStyle({ fillColor: '#6fa8dc' });
         });
 
-        // CLICK
         layer.on('click', () => {
           map.fitBounds(layer.getBounds(), { padding: [20, 20] });
           afiseazaUAT(feature.properties.Judet);
@@ -81,7 +75,14 @@ fetch('judete.geojson')
 function afiseazaUAT(judetSelectat) {
 
   if (layerJudete) map.removeLayer(layerJudete);
-  if (layerUAT) map.removeLayer(layerUAT);
+
+  if (layerUAT) {
+    map.removeLayer(layerUAT);
+    layerUAT = null;
+  }
+
+  uatLabels.forEach(l => map.removeLayer(l));
+  uatLabels = [];
 
   fetch('uat.geojson')
     .then(r => r.json())
@@ -91,7 +92,7 @@ function afiseazaUAT(judetSelectat) {
         filter: f => norm(f.properties.Judet) === norm(judetSelectat),
 
         style: {
-          color: '#000000',     // contur negru UAT
+          color: '#000',
           weight: 0.8,
           fillColor: '#ffe599',
           fillOpacity: 0.9
@@ -99,53 +100,45 @@ function afiseazaUAT(judetSelectat) {
 
         onEachFeature: (feature, layer) => {
 
-          // ============================
-          // POLYLABEL – PUNCT INTERIOR REAL
-          // ============================
-          let rings;
+          // ================== POLYLABEL ==================
+          let rings = null;
 
           if (feature.geometry.type === 'Polygon') {
             rings = feature.geometry.coordinates;
-          } else if (feature.geometry.type === 'MultiPolygon') {
-            // cel mai mare poligon (mai corect decât [0])
-            rings = feature.geometry.coordinates
-              .sort((a, b) => b[0].length - a[0].length)[0];
           }
 
+          if (feature.geometry.type === 'MultiPolygon') {
+            rings = feature.geometry.coordinates[0];
+          }
+
+          if (!rings) return;
+
           const [x, y] = polylabel(rings, 1.0);
-          const labelLatLng = L.latLng(y, x);
+          const latlng = L.latLng(y, x);
 
           const label = L.tooltip({
             permanent: true,
             direction: 'center',
             className: 'label-uat'
           })
-          .setContent(feature.properties.UAT)
-          .setLatLng(labelLatLng)
-          .addTo(map);
+            .setContent(feature.properties.UAT)
+            .setLatLng(latlng)
+            .addTo(map);
 
           uatLabels.push(label);
 
-          // ============================
-          // HOVER
-          // ============================
+          // ================== HOVER ==================
           layer.on('mouseover', () => {
-            layer.setStyle({
-              fillColor: '#f1c232',
-              weight: 1.2
-            });
+            layer.setStyle({ fillColor: '#f1c232' });
             label.getElement()?.classList.add('label-hover');
           });
 
           layer.on('mouseout', () => {
-            layer.setStyle({
-              fillColor: '#ffe599',
-              weight: 0.8
-            });
+            layer.setStyle({ fillColor: '#ffe599' });
             label.getElement()?.classList.remove('label-hover');
           });
 
-          // CLICK → URL
+          // ================== CLICK ==================
           layer.on('click', () => {
             if (feature.properties.URL) {
               window.open(feature.properties.URL, '_blank');
@@ -157,16 +150,3 @@ function afiseazaUAT(judetSelectat) {
       backBtn.style.display = 'block';
     });
 }
-
-// ================== ZOOM HANDLING (CURAT) ==================
-map.on('zoomend', () => {
-  const z = map.getZoom();
-
-  uatLabels.forEach(label => {
-    if (z >= 9) {
-      if (!map.hasLayer(label)) label.addTo(map);
-    } else {
-      if (map.hasLayer(label)) map.removeLayer(label);
-    }
-  });
-});
