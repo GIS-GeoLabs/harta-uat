@@ -8,11 +8,13 @@ function norm(txt) {
     .replace(/[\u0300-\u036f]/g, "");
 }
 
-// ================== HARTĂ ==================
-const map = L.map('map').setView([45.9, 24.9], 7);
+// ================== MAP INIT ==================
+const map = L.map('map', {
+  zoomSnap: 0.25
+}).setView([45.9, 24.9], 7);
 
-let layerJudete = null;
-let layerUAT = null;
+let layerJudete;
+let layerUAT;
 let uatLabels = [];
 
 const backBtn = document.getElementById('backBtn');
@@ -36,15 +38,15 @@ fetch('judete.geojson')
 
     layerJudete = L.geoJSON(data, {
       style: {
-        color: '#ffffff',
-        weight: 1.2,
+        color: '#ffffff',      // contur alb
+        weight: 1.3,
         fillColor: '#6fa8dc',
         fillOpacity: 0.9
       },
 
       onEachFeature: (feature, layer) => {
 
-        // LABEL JUDEȚ (CENTRU REAL)
+        // LABEL JUDEȚ – simplu, negru
         layer.bindTooltip(feature.properties.Judet, {
           permanent: true,
           direction: 'center',
@@ -53,11 +55,17 @@ fetch('judete.geojson')
 
         // HOVER
         layer.on('mouseover', () => {
-          layer.setStyle({ fillColor: '#3d85c6', weight: 2 });
+          layer.setStyle({
+            fillColor: '#3d85c6',
+            weight: 2
+          });
         });
 
         layer.on('mouseout', () => {
-          layer.setStyle({ fillColor: '#6fa8dc', weight: 1.2 });
+          layer.setStyle({
+            fillColor: '#6fa8dc',
+            weight: 1.3
+          });
         });
 
         // CLICK
@@ -83,7 +91,7 @@ function afiseazaUAT(judetSelectat) {
         filter: f => norm(f.properties.Judet) === norm(judetSelectat),
 
         style: {
-          color: '#000',
+          color: '#000000',     // contur negru UAT
           weight: 0.8,
           fillColor: '#ffe599',
           fillOpacity: 0.9
@@ -92,16 +100,19 @@ function afiseazaUAT(judetSelectat) {
         onEachFeature: (feature, layer) => {
 
           // ============================
-          // POLYLABEL – punct interior
+          // POLYLABEL – PUNCT INTERIOR REAL
           // ============================
-          let coords = feature.geometry.coordinates;
+          let rings;
 
-          // normalizare GeoJSON → polylabel
-          if (feature.geometry.type === 'MultiPolygon') {
-            coords = coords[0];
+          if (feature.geometry.type === 'Polygon') {
+            rings = feature.geometry.coordinates;
+          } else if (feature.geometry.type === 'MultiPolygon') {
+            // cel mai mare poligon (mai corect decât [0])
+            rings = feature.geometry.coordinates
+              .sort((a, b) => b[0].length - a[0].length)[0];
           }
 
-          const [x, y] = polylabel(coords, 1.0);
+          const [x, y] = polylabel(rings, 1.0);
           const labelLatLng = L.latLng(y, x);
 
           const label = L.tooltip({
@@ -112,6 +123,8 @@ function afiseazaUAT(judetSelectat) {
           .setContent(feature.properties.UAT)
           .setLatLng(labelLatLng)
           .addTo(map);
+
+          uatLabels.push(label);
 
           // ============================
           // HOVER
@@ -145,19 +158,15 @@ function afiseazaUAT(judetSelectat) {
     });
 }
 
-// ================== LOGICĂ LABEL UAT ==================
-function updateUATLabels() {
-  const zoom = map.getZoom();
+// ================== ZOOM HANDLING (CURAT) ==================
+map.on('zoomend', () => {
+  const z = map.getZoom();
 
   uatLabels.forEach(label => {
-    const px = map.latLngToContainerPoint(label.getLatLng());
-
-    // criteriu simplu: zoom + poziție în ecran
-    if (zoom >= 9 && px.x > 0 && px.y > 0) {
+    if (z >= 9) {
       if (!map.hasLayer(label)) label.addTo(map);
     } else {
       if (map.hasLayer(label)) map.removeLayer(label);
     }
   });
-}
-
+});
