@@ -54,7 +54,7 @@ function getLabelLatLng(feature, layer) {
   }
 }
 
-var map = L.map('map', { preferCanvas: true }).setView([45.9, 24.9], 7);
+var map = L.map('map').setView([45.9, 24.9], 7);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap',
@@ -96,19 +96,13 @@ fetch('judete.geojson')
           direction: 'center',
           className: 'label-judet'
         });
-        layer.on('mouseover', function() {
-  layer.setStyle({ fillColor: '#f1c232' });
-  if (label.getElement()) {
-    label.getElement().classList.add('label-hover');
-  }
-});
-layer.on('mouseout', function() {
-  layer.setStyle({ fillColor: '#ffe599' });
-  if (label.getElement()) {
-    label.getElement().classList.remove('label-hover');
-  }
-});
 
+        layer.on('mouseover', function() {
+          layer.setStyle({ fillColor: '#3d85c6' });
+        });
+        layer.on('mouseout', function() {
+          layer.setStyle({ fillColor: '#6fa8dc' });
+        });
         layer.on('click', function() {
           map.fitBounds(layer.getBounds(), { padding: [20, 20] });
           afiseazaUAT(feature.properties.Judet);
@@ -128,7 +122,10 @@ function afiseazaUAT(judetSelectat) {
   fetch('uat.geojson')
     .then(function(r) { return r.json(); })
     .then(function(data) {
+      var canvasRenderer = L.canvas({ padding: 0.5 });
+
       layerUAT = L.geoJSON(data, {
+        renderer: canvasRenderer,
         filter: function(f) {
           return norm(f.properties.Judet) === norm(judetSelectat);
         },
@@ -142,31 +139,30 @@ function afiseazaUAT(judetSelectat) {
           var labelLatLng = getLabelLatLng(feature, layer);
 
           var label = L.marker(labelLatLng, {
-  icon: L.divIcon({
-    className: 'label-uat',
-    html: feature.properties.UAT,
-    iconSize: [0, 0],
-    iconAnchor: [0, 0]
-  }),
-  interactive: false,
-  keyboard: false
-}).addTo(map);
+            icon: L.divIcon({
+              className: 'label-uat',
+              html: feature.properties.UAT,
+              iconSize: [0, 0],
+              iconAnchor: [0, 0]
+            }),
+            interactive: false,
+            keyboard: false
+          }).addTo(map);
 
           uatLabels.push(label);
 
-       layer.on('mouseover', function() {
-  layer.setStyle({ fillColor: '#f1c232' });
-  if (label.getElement()) {
-    label.getElement().classList.add('label-hover');
-  }
-});
-layer.on('mouseout', function() {
-  layer.setStyle({ fillColor: '#ffe599' });
-  if (label.getElement()) {
-    label.getElement().classList.remove('label-hover');
-  }
-});
-
+          layer.on('mouseover', function() {
+            layer.setStyle({ fillColor: '#f1c232' });
+            if (label.getElement()) {
+              label.getElement().classList.add('label-hover');
+            }
+          });
+          layer.on('mouseout', function() {
+            layer.setStyle({ fillColor: '#ffe599' });
+            if (label.getElement()) {
+              label.getElement().classList.remove('label-hover');
+            }
+          });
           layer.on('click', function() {
             if (feature.properties.URL) {
               window.open(feature.properties.URL, '_blank');
@@ -178,4 +174,3 @@ layer.on('mouseout', function() {
       backBtn.style.display = 'block';
     });
 }
-
