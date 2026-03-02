@@ -1,6 +1,5 @@
 // ================== UTILS ==================
 function norm(txt) {
-  // folosim \p{Mn} în loc de range unicode - evită problema \\u la copiere
   return txt.toString().trim().toUpperCase()
     .normalize("NFD").replace(/\p{Mn}/gu, "");
 }
@@ -38,6 +37,18 @@ function getLargestPolygonRings(coords) {
   return best;
 }
 
+function pointInRing(pt, ring) {
+  var x = pt[0], y = pt[1], inside = false;
+  for (var i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    var xi = ring[i][0], yi = ring[i][1];
+    var xj = ring[j][0], yj = ring[j][1];
+    if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
+      inside = !inside;
+    }
+  }
+  return inside;
+}
+
 function getLabelLatLng(feature, layer) {
   var rings = null;
   if (feature.geometry.type === 'Polygon') {
@@ -45,29 +56,25 @@ function getLabelLatLng(feature, layer) {
   } else if (feature.geometry.type === 'MultiPolygon') {
     rings = getLargestPolygonRings(feature.geometry.coordinates);
   }
-
   if (!rings) return layer.getBounds().getCenter();
 
-  // Încearcă polylabel
   try {
+    // centroidul vizual întâi — mai bun pentru forme alungite
+    var ring = rings[0];
+    var cx = 0, cy = 0, n = ring.length - 1;
+    for (var k = 0; k < n; k++) { cx += ring[k][0]; cy += ring[k][1]; }
+    var centroid = [cx / n, cy / n];
+
+    if (pointInRing(centroid, ring)) {
+      return L.latLng(centroid[1], centroid[0]);
+    }
+
+    // centroid în afara poligonului (formă concavă) → polylabel
     var pt = polylabel(rings, 0.0001);
     return L.latLng(pt[1], pt[0]);
-  } catch (e) {
-    console.warn('polylabel error:', feature.properties.UAT, e);
-  }
 
-  // Fallback: centroidul inelului exterior al celui mai mare poligon
-  // NU getBounds().getCenter() care ar cădea între cele 2 părți ale MultiPolygon
-  try {
-    var ring = rings[0];
-    var cx = 0, cy = 0;
-    var n = ring.length - 1;
-    for (var k = 0; k < n; k++) {
-      cx += ring[k][0];
-      cy += ring[k][1];
-    }
-    return L.latLng(cy / n, cx / n);
-  } catch (e2) {
+  } catch (e) {
+    console.warn('label error:', feature.properties.UAT, e);
     return layer.getBounds().getCenter();
   }
 }
