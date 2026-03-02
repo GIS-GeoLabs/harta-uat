@@ -9,35 +9,43 @@
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
   <style>
-   /* HARTA */
-#map {
-  height: 100vh;
-}
+    #map {
+      height: 100vh;
+    }
 
-/* LABEL SIMPLU */
-.label-judet,
-.label-uat {
-  color: #000;
-  background: none !important;
-  border: none !important;
-  box-shadow: none !important;
-  white-space: nowrap;
-  pointer-events: none;
-  text-align: center;
-}
+    /* LABEL JUDEȚ */
+    .leaflet-tooltip.label-judet {
+      background: none;
+      border: none;
+      box-shadow: none;
+      color: #000;
+      font-size: 13px;
+      font-weight: 600;
+      pointer-events: none;
+      white-space: nowrap;
+      text-align: center;
+    }
 
-/* JUDEȚ */
-.label-judet {
-  font-size: 11px;
-  font-weight: 600;
-}
+    /* LABEL UAT */
+    .leaflet-tooltip.label-uat {
+      background: none;
+      border: none;
+      box-shadow: none;
+      color: #000;
+      font-size: 10px;
+      pointer-events: none;
+      white-space: nowrap;
+      transition: transform 0.15s ease, font-size 0.15s ease;
+    }
 
-/* UAT */
-.label-uat {
-  font-size: 9px;
-}
+    /* HOVER LABEL */
+    .label-hover {
+      font-size: 11px;
+      font-weight: 600;
+      transform: scale(1.05);
+    }
 
-    /* BUTON INAPOI */
+    /* BUTON */
     #backBtn {
       position: absolute;
       top: 10px;
@@ -54,31 +62,6 @@
     #backBtn:hover {
       background: #f2f2f2;
     }
-
-/* LABEL JUDEȚ – SIMPLU, NEGRU */
-.leaflet-tooltip.label-judet {
-  background: none;
-  border: none;
-  box-shadow: none;
-  color: #000;
-  font-size: 13px;
-  font-weight: 600;
-  text-align: center;
-  pointer-events: none;
-  white-space: nowrap;
-}
-
-/* LABEL UAT – SIMPLU, NEGRU */
-.leaflet-tooltip.label-uat {
-  background: none;
-  border: none;
-  box-shadow: none;
-  color: #000;
-  font-size: 11px;
-  font-weight: 400;
-  pointer-events: none;
-  white-space: nowrap;
-}
   </style>
 </head>
 
@@ -90,7 +73,3 @@
   <script src="app.js"></script>
 </body>
 </html>
-
-
-
-
