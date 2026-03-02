@@ -4,89 +4,88 @@
   <meta charset="UTF-8">
   <title>Hartă România</title>
 
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
   <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
     #map {
       height: 100vh;
       width: 100vw;
     }
 
-    /* LABEL JUDEȚ */
     .leaflet-tooltip.label-judet {
       background: none;
       border: none;
       box-shadow: none;
       color: #000;
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 700;
       pointer-events: none;
       white-space: nowrap;
       text-align: center;
+      text-shadow:
+        1px  1px 2px rgba(255,255,255,0.8),
+       -1px -1px 2px rgba(255,255,255,0.8);
     }
 
-    /* LABEL UAT */
-.label-uat {
-  background: none;
-  border: none;
-  box-shadow: none;
-  color: #1a1a1a;
-  font-size: 10px;
-  font-weight: 500;
-  font-family: Arial, sans-serif;
-  pointer-events: none;
-  white-space: nowrap;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  line-height: 1.2;
-  text-shadow:
-    1px  1px 2px rgba(255,255,255,0.95),
-   -1px -1px 2px rgba(255,255,255,0.95),
-    1px -1px 2px rgba(255,255,255,0.95),
-   -1px  1px 2px rgba(255,255,255,0.95);
-}
+    .label-uat {
+      background: none;
+      border: none;
+      box-shadow: none;
+      color: #1a1a1a;
+      font-size: 10px;
+      font-weight: 500;
+      font-family: Arial, sans-serif;
+      pointer-events: none;
+      white-space: nowrap;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      line-height: 1.3;
+      text-shadow:
+        1px  1px 2px rgba(255,255,255,0.95),
+       -1px -1px 2px rgba(255,255,255,0.95),
+        1px -1px 2px rgba(255,255,255,0.95),
+       -1px  1px 2px rgba(255,255,255,0.95);
+    }
 
-.label-uat.label-hover {
-  font-size: 11px;
-  font-weight: 700;
-  color: #000;
-}
+    .label-uat.label-hover {
+      font-size: 11px;
+      font-weight: 700;
+      color: #000;
+    }
 
-/* ascunde labelurile la zoom mic */
-.labels-hidden .label-uat {
-  display: none;
-}
+    /* ascunde labeluri UAT la zoom mic */
+    .labels-hidden .label-uat {
+      display: none;
+    }
 
     #backBtn {
       position: absolute;
       top: 10px;
       left: 10px;
       z-index: 1000;
-      padding: 6px 12px;
+      padding: 6px 14px;
       background: white;
       border: 1px solid #999;
+      border-radius: 4px;
       cursor: pointer;
+      font-size: 13px;
       display: none;
+    }
+
+    #backBtn:hover {
+      background: #f0f0f0;
     }
   </style>
 </head>
 
 <body>
-
   <div id="map"></div>
-  <button id="backBtn">Înapoi la județe</button>
+  <button id="backBtn">&#8592; Înapoi la județe</button>
 
-  <!-- LIBRARII -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/polylabel@1.1.0/polylabel.min.js"></script>
-
-  <!-- APP -->
+  <script src="https://unpkg.com/polylabel@1.1.0/dist/polylabel.min.js"></script>
   <script src="app.js"></script>
-
 </body>
 </html>
-
-
