@@ -1,10 +1,14 @@
 // ================== UTILS ==================
 function norm(txt) {
-  return txt.toString().trim().toUpperCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return txt
+    .toString()
+    .trim()
+    .toUpperCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, ""); // ← FIX: \u nu \\u
 }
 
-// ================== LARGEST POLYGON (fix MultiPolygon) ==================
+// ================== LARGEST POLYGON pentru MultiPolygon ==================
 function getLargestPolygonRings(multiPolygonCoords) {
   let maxArea = -1;
   let bestRings = null;
@@ -28,15 +32,14 @@ function getLargestPolygonRings(multiPolygonCoords) {
 
 // ================== MAP ==================
 const map = L.map('map', {
-  preferCanvas: true   // ← performanță mai bună cu multe features
+  preferCanvas: true
 }).setView([45.9, 24.9], 7);
 
-// TILE LAYER – cu opțiuni de performanță
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap',
   maxZoom: 19,
-  updateWhenIdle: true,      // ← încarcă tiles doar după ce harta s-a oprit
-  updateWhenZooming: false,  // ← nu reîncarca la fiecare frame de zoom
+  updateWhenIdle: true,
+  updateWhenZooming: false,
   keepBuffer: 2
 }).addTo(map);
 
@@ -64,12 +67,16 @@ fetch('judete.geojson')
   .then(data => {
     layerJudete = L.geoJSON(data, {
       style: {
-        color: '#ffffff', weight: 1.3,
-        fillColor: '#6fa8dc', fillOpacity: 0.9
+        color: '#ffffff',
+        weight: 1.3,
+        fillColor: '#6fa8dc',
+        fillOpacity: 0.9
       },
       onEachFeature: (feature, layer) => {
         layer.bindTooltip(feature.properties.Judet, {
-          permanent: true, direction: 'center', className: 'label-judet'
+          permanent: true,
+          direction: 'center',
+          className: 'label-judet'
         });
 
         layer.on('mouseover', () => layer.setStyle({ fillColor: '#3d85c6' }));
@@ -96,47 +103,62 @@ function afiseazaUAT(judetSelectat) {
         filter: f => norm(f.properties.Judet) === norm(judetSelectat),
 
         style: {
-          color: '#000', weight: 0.8,
-          fillColor: '#ffe599', fillOpacity: 0.9
+          color: '#000',
+          weight: 0.8,
+          fillColor: '#ffe599',
+          fillOpacity: 0.9
         },
 
         onEachFeature: (feature, layer) => {
           let labelLatLng;
 
-          // ================== POLYLABEL cu fix MultiPolygon ==================
-try {
-  let rings = null;
+          // ================== POLYLABEL ==================
+          try {
+            let rings = null;
 
-  if (feature.geometry.type === 'Polygon') {
-    rings = feature.geometry.coordinates;
-  } else if (feature.geometry.type === 'MultiPolygon') {
-    rings = getLargestPolygonRings(feature.geometry.coordinates); // ← cel mai mare poligon
-  }
+            if (feature.geometry.type === 'Polygon') {
+              rings = feature.geometry.coordinates;
+            } else if (feature.geometry.type === 'MultiPolygon') {
+              rings = getLargestPolygonRings(feature.geometry.coordinates);
+            }
 
-  if (rings) {
-    // ← FIX CRITIC: precizie 0.00001 grade (~1m), nu 1.0 (~111km)
-    const [x, y] = polylabel(rings, 0.00001);
-    labelLatLng = L.latLng(y, x);
-  }
-} catch (e) {
-  console.warn('polylabel failed:', feature.properties.UAT);
-}
+            if (rings) {
+              const [x, y] = polylabel(rings, 0.00001); // ← precizie corectă pentru grade WGS84
+              labelLatLng = L.latLng(y, x);
+            }
+          } catch (e) {
+            console.warn('polylabel failed:', feature.properties.UAT);
+          }
 
-// Fallback mai robust: centroidul real al inelului exterior, nu bbox center
-if (!labelLatLng) {
-  try {
-    const geom = feature.geometry;
-    const ring = geom.type === 'Polygon'
-      ? geom.coordinates[0]
-      : getLargestPolygonRings(geom.coordinates)[0];
+          // ================== FALLBACK: centroid real al inelului exterior ==================
+          if (!labelLatLng) {
+            try {
+              const geom = feature.geometry;
+              const ring = geom.type === 'Polygon'
+                ? geom.coordinates[0]
+                : getLargestPolygonRings(geom.coordinates)[0];
 
-    let x = 0, y = 0;
-    const n = ring.length - 1;
-    for (let i = 0; i < n; i++) { x += ring[i][0]; y += ring[i][1]; }
-    labelLatLng = L.latLng(y / n, x / n);
-  } catch (e) {
-    labelLatLng = layer.getBounds().getCenter(); // ultimul resort
-  }
-}
+              let cx = 0, cy = 0;
+              const n = ring.length - 1;
+              for (let i = 0; i < n; i++) {
+                cx += ring[i][0];
+                cy += ring[i][1];
+              }
+              labelLatLng = L.latLng(cy / n, cx / n);
+            } catch (e) {
+              labelLatLng = layer.getBounds().getCenter();
+            }
+          }
 
+          const label = L.tooltip({
+            permanent: true,
+            direction: 'center',
+            className: 'label-uat'
+          })
+            .setContent(feature.properties.UAT)
+            .setLatLng(labelLatLng)
+            .addTo(map);
 
+          uatLabels.push(label);
+
+          layer.on('mouseover', ()
