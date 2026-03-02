@@ -1,7 +1,8 @@
 // ================== UTILS ==================
 function norm(txt) {
+  // folosim \p{Mn} în loc de range unicode - evită problema \\u la copiere
   return txt.toString().trim().toUpperCase()
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    .normalize("NFD").replace(/\p{Mn}/gu, "");
 }
 
 function formatUATName(name) {
@@ -47,11 +48,26 @@ function getLabelLatLng(feature, layer) {
 
   if (!rings) return layer.getBounds().getCenter();
 
+  // Încearcă polylabel
   try {
     var pt = polylabel(rings, 0.0001);
     return L.latLng(pt[1], pt[0]);
   } catch (e) {
-    console.warn('polylabel error:', feature.properties.UAT);
+    console.warn('polylabel error:', feature.properties.UAT, e);
+  }
+
+  // Fallback: centroidul inelului exterior al celui mai mare poligon
+  // NU getBounds().getCenter() care ar cădea între cele 2 părți ale MultiPolygon
+  try {
+    var ring = rings[0];
+    var cx = 0, cy = 0;
+    var n = ring.length - 1;
+    for (var k = 0; k < n; k++) {
+      cx += ring[k][0];
+      cy += ring[k][1];
+    }
+    return L.latLng(cy / n, cx / n);
+  } catch (e2) {
     return layer.getBounds().getCenter();
   }
 }
