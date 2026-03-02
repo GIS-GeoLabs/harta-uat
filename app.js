@@ -37,19 +37,6 @@ function getLargestPolygonRings(coords) {
   return best;
 }
 
-function pointInRing(pt, ring) {
-  var x = pt[0], y = pt[1];
-  var inside = false;
-  for (var i = 0, j = ring.length - 1; i < ring.length; j = i++) {
-    var xi = ring[i][0], yi = ring[i][1];
-    var xj = ring[j][0], yj = ring[j][1];
-    if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
-      inside = !inside;
-    }
-  }
-  return inside;
-}
-
 function getLabelLatLng(feature, layer) {
   var rings = null;
   if (feature.geometry.type === 'Polygon') {
@@ -62,27 +49,7 @@ function getLabelLatLng(feature, layer) {
 
   try {
     var pt = polylabel(rings, 0.0001);
-    var bounds = layer.getBounds();
-    var bboxW = bounds.getEast() - bounds.getWest();
-    var bboxH = bounds.getNorth() - bounds.getSouth();
-    var minDim = Math.min(bboxW, bboxH);
-
-    // poligon lat (normal) → polylabel e fiabil
-    if (minDim > 0.01) {
-      return L.latLng(pt[1], pt[0]);
-    }
-
-    // poligon îngust/alungit → încearcă centrul bbox
-    var latMid = (bounds.getNorth() + bounds.getSouth()) / 2;
-    var lngMid = (bounds.getEast() + bounds.getWest()) / 2;
-
-    if (pointInRing([lngMid, latMid], rings[0])) {
-      return L.latLng(latMid, lngMid);
-    }
-
-    // centrul bbox nu e în poligon → polylabel e oricum cel mai bun
     return L.latLng(pt[1], pt[0]);
-
   } catch (e) {
     console.warn('polylabel error:', feature.properties.UAT);
     return layer.getBounds().getCenter();
