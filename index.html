@@ -14,6 +14,7 @@
       width: 100vw;
     }
 
+    /* LABEL JUDEȚ */
     .leaflet-tooltip.label-judet {
       background: none;
       border: none;
@@ -29,7 +30,20 @@
        -1px -1px 2px rgba(255,255,255,0.8);
     }
 
+    /* CONTAINER DIVICON - suprascrie stilul implicit Leaflet */
+    #map .uat-marker-container.leaflet-div-icon {
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+
+    /* LABEL UAT */
     .label-uat {
+      display: inline-block;
       background: none;
       border: none;
       box-shadow: none;
@@ -55,11 +69,11 @@
       color: #000;
     }
 
-    /* ascunde labeluri UAT la zoom mic */
     .labels-hidden .label-uat {
       display: none;
     }
 
+    /* BUTON ÎNAPOI */
     #backBtn {
       position: absolute;
       top: 10px;
@@ -89,4 +103,3 @@
   <script src="app.js"></script>
 </body>
 </html>
-
