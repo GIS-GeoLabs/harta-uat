@@ -197,16 +197,16 @@ function afiseazaUAT(judetSelectat) {
   for (var i = 0; i < uatLabels.length; i++) map.removeLayer(uatLabels[i]);
   uatLabels = [];
 
-  fetch('uat.geojson')
+  var fileName = 'uat_judete/uat_' + norm(judetSelectat) + '.geojson'; // ← fișier per județ
+
+  fetch(fileName)
     .then(function(r) { return r.json(); })
     .then(function(data) {
       var canvasRenderer = L.canvas({ padding: 0.5 });
 
       layerUAT = L.geoJSON(data, {
         renderer: canvasRenderer,
-        filter: function(f) {
-          return norm(f.properties.Judet) === norm(judetSelectat);
-        },
+        // filter dispare — fișierul conține deja doar UAT-urile județului
         style: { color: '#000', weight: 1.5, fillColor: '#ffe599', fillOpacity: 0.9 },
         onEachFeature: function(feature, layer) {
           var labelLatLng = getLabelLatLng(feature, layer);
@@ -242,8 +242,12 @@ function afiseazaUAT(judetSelectat) {
       }).addTo(map);
 
       layerControl.addOverlay(layerUAT, 'UAT-uri');
-
       backBtn.style.display = 'block';
       map.getContainer().classList.remove('labels-hidden');
+    })
+    .catch(function(e) {
+      console.error('Eroare la încărcarea UAT pentru: ' + judetSelectat, e);
     });
 }
+
+
