@@ -167,6 +167,7 @@ layerJudete = L.geoJSON(data, {
     });
   }
 }).addTo(map);
+    });
 
 // ================== UAT ==================
 function afiseazaUAT(judetSelectat) {
@@ -233,4 +234,5 @@ layer.on('mouseout', function() {
       map.getContainer().classList.remove('labels-hidden'); // ← mereu vizibile când UAT activ
     });
 }
+
 
