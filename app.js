@@ -9,7 +9,6 @@ function norm(txt) {
   return result;
 }
 
-// ----- HASH STABIL PENTRU JUDEȚ -----
 function stringToHash(str) {
   var hash = 0;
   for (var i = 0; i < str.length; i++) {
@@ -21,13 +20,12 @@ function stringToHash(str) {
 
 function getBlueFromName(name) {
   var hash = stringToHash(norm(name));
-  var hue = 210; // albastru stabil
-  var saturation = 60 + (hash % 20); // 60–79%
-  var lightness = 45 + (hash % 15);  // 45–59%
+  var hue = 210;
+  var saturation = 60 + (hash % 20);
+  var lightness = 45 + (hash % 15);
   return 'hsl(' + hue + ',' + saturation + '%,' + lightness + '%)';
 }
 
-// ----- FORMAT LABEL UAT -----
 function formatUATName(name) {
   if (!name) return '';
   if (name.length <= 10) return name;
@@ -42,7 +40,6 @@ function formatUATName(name) {
   return name.substring(0, splitAt) + '<br>' + name.substring(splitAt + 1);
 }
 
-// ----- CENTROID LOGIC (NU SE MODIFICĂ) -----
 function getLargestPolygonRings(coords) {
   var best = null, maxArea = -1;
   for (var i = 0; i < coords.length; i++) {
@@ -119,18 +116,13 @@ var osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
   keepBuffer: 2
 }).addTo(map);
 
-// strat gol pentru opțiunea "Fără hartă de fundal"
 var blankLayer = L.tileLayer('', { attribution: '' });
 
-var baseLayers = {
-  'OpenStreetMap': osmLayer,
-  'Fără fundal': blankLayer
-};
-
-L.control.layers(baseLayers, null, {
-  position: 'topright',
-  collapsed: false
-}).addTo(map);
+var layerControl = L.control.layers(
+  { 'OpenStreetMap': osmLayer, 'Fără fundal': blankLayer },
+  {},
+  { position: 'topright', collapsed: false }
+).addTo(map);
 
 var MIN_UAT_LABEL_ZOOM = 10;
 var uatActive = false;
@@ -151,7 +143,10 @@ var backBtn = document.getElementById('backBtn');
 // ================== RESET ==================
 backBtn.onclick = function() {
   uatActive = false;
-  if (layerUAT) map.removeLayer(layerUAT);
+  if (layerUAT) {
+    layerControl.removeLayer(layerUAT);
+    map.removeLayer(layerUAT);
+  }
   for (var i = 0; i < uatLabels.length; i++) map.removeLayer(uatLabels[i]);
   uatLabels = [];
   if (layerJudete) layerJudete.addTo(map);
@@ -164,67 +159,47 @@ backBtn.onclick = function() {
 fetch('judete.geojson')
   .then(function(r) { return r.json(); })
   .then(function(data) {
-
     layerJudete = L.geoJSON(data, {
-
       style: function(feature) {
         var color = getBlueFromName(feature.properties.Judet);
         feature.properties._color = color;
-
-        return {
-          color: '#ffffff',
-          weight: 2.5,
-          fillColor: color,
-          fillOpacity: 0.9
-        };
+        return { color: '#ffffff', weight: 2.5, fillColor: color, fillOpacity: 0.9 };
       },
-
       onEachFeature: function(feature, layer) {
-
         layer.bindTooltip(feature.properties.Judet, {
-          permanent: true,
-          direction: 'center',
-          className: 'label-judet'
+          permanent: true, direction: 'center', className: 'label-judet'
         });
-
         layer.on('mouseover', function() {
-          layer.setStyle({
-            weight: 4,
-            fillOpacity: 1
-          });
+          layer.setStyle({ weight: 4, fillOpacity: 1 });
           layer.bringToFront();
         });
-
         layer.on('mouseout', function() {
-          layer.setStyle({
-            weight: 2.5,
-            fillOpacity: 0.9
-          });
+          layer.setStyle({ weight: 2.5, fillOpacity: 0.9 });
         });
-
         layer.on('click', function() {
           map.fitBounds(layer.getBounds(), { padding: [20, 20] });
           afiseazaUAT(feature.properties.Judet);
         });
       }
-
     }).addTo(map);
 
+    layerControl.addOverlay(layerJudete, 'Județe');
   });
 
 // ================== UAT ==================
 function afiseazaUAT(judetSelectat) {
   uatActive = true;
-
   if (layerJudete) map.removeLayer(layerJudete);
-  if (layerUAT) map.removeLayer(layerUAT);
+  if (layerUAT) {
+    layerControl.removeLayer(layerUAT);
+    map.removeLayer(layerUAT);
+  }
   for (var i = 0; i < uatLabels.length; i++) map.removeLayer(uatLabels[i]);
   uatLabels = [];
 
   fetch('uat.geojson')
     .then(function(r) { return r.json(); })
     .then(function(data) {
-
       var canvasRenderer = L.canvas({ padding: 0.5 });
 
       layerUAT = L.geoJSON(data, {
@@ -233,9 +208,7 @@ function afiseazaUAT(judetSelectat) {
           return norm(f.properties.Judet) === norm(judetSelectat);
         },
         style: { color: '#000', weight: 1.5, fillColor: '#ffe599', fillOpacity: 0.9 },
-
         onEachFeature: function(feature, layer) {
-
           var labelLatLng = getLabelLatLng(feature, layer);
 
           var label = L.marker(labelLatLng, {
@@ -257,22 +230,20 @@ function afiseazaUAT(judetSelectat) {
             var el = label.getElement();
             if (el) el.querySelector('.label-uat').classList.add('label-hover');
           });
-
           layer.on('mouseout', function() {
             layer.setStyle({ fillColor: '#ffe599', weight: 1.5 });
             var el = label.getElement();
             if (el) el.querySelector('.label-uat').classList.remove('label-hover');
           });
-
           layer.on('click', function() {
-            if (feature.properties.URL)
-              window.open(feature.properties.URL, '_blank');
+            if (feature.properties.URL) window.open(feature.properties.URL, '_blank');
           });
         }
       }).addTo(map);
+
+      layerControl.addOverlay(layerUAT, 'UAT-uri');
 
       backBtn.style.display = 'block';
       map.getContainer().classList.remove('labels-hidden');
     });
 }
-
