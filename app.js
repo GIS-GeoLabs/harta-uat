@@ -236,8 +236,12 @@ function afiseazaUAT(judetSelectat) {
             if (el) el.querySelector('.label-uat').classList.remove('label-hover');
           });
           layer.on('click', function() {
-            if (feature.properties.URL) window.open(feature.properties.URL, '_blank');
-          });
+  var siruta = String(feature.properties.SIRUTA || '').trim();
+
+  if (siruta !== '') {
+    window.location.href = '/apysis/siruta=' + siruta;
+  }
+});
         }
       }).addTo(map);
 
@@ -249,5 +253,6 @@ function afiseazaUAT(judetSelectat) {
       console.error('Eroare la încărcarea UAT pentru: ' + judetSelectat, e);
     });
 }
+
 
 
