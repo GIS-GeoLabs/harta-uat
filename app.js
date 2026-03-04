@@ -217,6 +217,7 @@ map.on('zoomend', function() {
 });
 
 var layerJudete = null, layerUAT = null, uatLabels = [];
+  var selectedJudetLayer = null;
 var backBtn = document.getElementById('backBtn');
 
 // ================== RESET ==================
@@ -255,10 +256,26 @@ fetch('judete.geojson')
         layer.on('mouseout', function() {
           layer.setStyle({ weight: 2.5, fillOpacity: 0.9 });
         });
-        layer.on('click', function() {
-          map.fitBounds(layer.getBounds(), { padding: [20, 20] });
-          afiseazaUAT(feature.properties.Judet);
-        });
+layer.on('click', function() {
+
+  // reset highlight anterior
+  if (selectedJudetLayer) {
+    layerJudete.resetStyle(selectedJudetLayer);
+  }
+
+  // setăm noul highlight
+  selectedJudetLayer = layer;
+
+  layer.setStyle({
+    weight: 5,
+    color: '#000',
+    fillOpacity: 1
+  });
+
+  map.fitBounds(layer.getBounds(), { padding: [20, 20] });
+
+  afiseazaUAT(feature.properties.Judet);
+});
       }
     }).addTo(map);
 
@@ -331,4 +348,5 @@ function afiseazaUAT(judetSelectat) {
     });
 }
 } // END init wrapper
+
 
