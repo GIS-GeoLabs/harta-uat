@@ -193,7 +193,7 @@ var layerControl = L.control.layers(
   {},
   {
     position: 'topright',
-    collapsed: true
+    collapsed: false
   }
 ).addTo(map);
 
@@ -348,5 +348,6 @@ function afiseazaUAT(judetSelectat) {
     });
 }
 } // END init wrapper
+
 
 
