@@ -96,6 +96,7 @@ function getLabelLatLng(feature, layer) {
   if (feature.properties.LabelLat && feature.properties.LabelLng) {
     return L.latLng(feature.properties.LabelLat, feature.properties.LabelLng);
   }
+
   var rings = null;
   if (feature.geometry.type === 'Polygon') {
     rings = feature.geometry.coordinates;
@@ -103,12 +104,45 @@ function getLabelLatLng(feature, layer) {
     rings = getLargestPolygonRings(feature.geometry.coordinates);
   }
   if (!rings) return layer.getBounds().getCenter();
+
   var ring = rings[0];
+
+  // 1. centroid area-weighted
   var c = ringCentroid(ring);
   if (pointInRing(c, ring)) return L.latLng(c[1], c[0]);
-  var cx = 0, cy = 0, n = ring.length - 1;
-  for (var k = 0; k < n; k++) { cx += ring[k][0]; cy += ring[k][1]; }
-  return L.latLng(cy / n, cx / n);
+
+  // 2. centrul bbox
+  var bounds = layer.getBounds();
+  var bx = (bounds.getWest() + bounds.getEast()) / 2;
+  var by = (bounds.getNorth() + bounds.getSouth()) / 2;
+  if (pointInRing([bx, by], ring)) return L.latLng(by, bx);
+
+  // 3. scanare verticală pe axa centrală — găsim cel mai lung segment interior
+  var cx = bx;
+  var ys = [];
+  for (var i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    var x1 = ring[j][0], y1 = ring[j][1];
+    var x2 = ring[i][0], y2 = ring[i][1];
+    if ((x1 <= cx && cx < x2) || (x2 <= cx && cx < x1)) {
+      var yint = y1 + (cx - x1) * (y2 - y1) / (x2 - x1);
+      ys.push(yint);
+    }
+  }
+  ys.sort(function(a, b) { return a - b; });
+  var bestLen = -1, bestY = by;
+  for (var k = 0; k + 1 < ys.length; k += 2) {
+    var len = ys[k + 1] - ys[k];
+    if (len > bestLen) {
+      bestLen = len;
+      bestY = (ys[k] + ys[k + 1]) / 2;
+    }
+  }
+  if (bestLen > 0) return L.latLng(bestY, cx);
+
+  // 4. fallback final — media vârfurilor
+  var mx = 0, my = 0, n = ring.length - 1;
+  for (var v = 0; v < n; v++) { mx += ring[v][0]; my += ring[v][1]; }
+  return L.latLng(my / n, mx / n);
 }
 
 // ================== MAP ==================
@@ -203,7 +237,7 @@ function afiseazaUAT(judetSelectat) {
   for (var i = 0; i < uatLabels.length; i++) map.removeLayer(uatLabels[i]);
   uatLabels = [];
 
-  var fileName = 'uat_judete/uat_' + norm(judetSelectat) + '.geojson'; // ← fișier per județ
+  var fileName = 'uat_judete/uat_' + norm(judetSelectat) + '.geojson';
 
   fetch(fileName)
     .then(function(r) { return r.json(); })
@@ -212,7 +246,6 @@ function afiseazaUAT(judetSelectat) {
 
       layerUAT = L.geoJSON(data, {
         renderer: canvasRenderer,
-        // filter dispare — fișierul conține deja doar UAT-urile județului
         style: { color: '#000', weight: 1.5, fillColor: '#ffe599', fillOpacity: 0.9 },
         onEachFeature: function(feature, layer) {
           var labelLatLng = getLabelLatLng(feature, layer);
@@ -242,12 +275,11 @@ function afiseazaUAT(judetSelectat) {
             if (el) el.querySelector('.label-uat').classList.remove('label-hover');
           });
           layer.on('click', function() {
-  var siruta = String(feature.properties.SIRUTA || '').trim();
-
-  if (siruta !== '') {
-    window.location.href = '/apysis/siruta=' + siruta;
-  }
-});
+            var siruta = String(feature.properties.SIRUTA || '').trim();
+            if (siruta !== '') {
+              window.location.href = '/apysis/siruta=' + siruta;
+            }
+          });
         }
       }).addTo(map);
 
@@ -260,9 +292,3 @@ function afiseazaUAT(judetSelectat) {
     });
 }
 } // END init wrapper
-
-
-
-
-
-
