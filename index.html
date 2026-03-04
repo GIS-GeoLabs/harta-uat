@@ -3,14 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <title>Hartă România</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-      .leaflet-container {
-    background: #ffffff !important;
-  }
 
-    #map { height: 100vh; width: 100vw; }
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    .leaflet-container {
+      background: #ffffff !important;
+    }
+
+    /* Containerul aplicației */
+    #apysis-map-wrapper {
+      position: relative;
+      width: 100%;
+      height: 600px; /* aici poate modifica el */
+    }
+
+    #apysis-map {
+      width: 100%;
+      height: 100%;
+    }
 
     .leaflet-tooltip.label-judet {
       background: none;
@@ -22,7 +33,8 @@
       pointer-events: none;
       white-space: nowrap;
       text-align: center;
-      text-shadow: 1px 1px 2px rgba(255,255,255,0.8), -1px -1px 2px rgba(255,255,255,0.8);
+      text-shadow: 1px 1px 2px rgba(255,255,255,0.8),
+                   -1px -1px 2px rgba(255,255,255,0.8);
     }
 
     .uat-label-wrap.leaflet-div-icon {
@@ -74,16 +86,21 @@
       font-size: 13px;
       display: none;
     }
+
     #backBtn:hover { background: #f0f0f0; }
   </style>
 </head>
+
 <body>
-  <div id="map"></div>
-  <button id="backBtn">&#8592; Înapoi la județe</button>
+
+  <!-- Wrapper aplicație -->
+  <div id="apysis-map-wrapper">
+    <div id="apysis-map"></div>
+    <button id="backBtn">&#8592; Înapoi la județe</button>
+  </div>
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="app.js"></script>
+
 </body>
 </html>
-
-
-
