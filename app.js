@@ -23,9 +23,9 @@ function stringToHash(str) {
 
 function getBlueFromName(name) {
   var hash = stringToHash(norm(name));
-  var hue = 208 + (hash % 8);        // 208-215 — albastru pur, ușor variabil
-  var saturation = 70 + (hash % 25); // 70-94% — culori vii
-  var lightness = 48 + (hash % 10);  // 48-57% — interval strâns, fără extreme
+  var hue = 210;
+  var saturation = 60 + (hash % 20);
+  var lightness = 45 + (hash % 15);
   return 'hsl(' + hue + ',' + saturation + '%,' + lightness + '%)';
 }
 
@@ -150,14 +150,14 @@ var osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
   updateWhenIdle: true,
   updateWhenZooming: false,
   keepBuffer: 2
-});
+}).addTo(map);
 
 var satelliteLayer = L.tileLayer(
   'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
   { attribution: 'Tiles © Esri', maxZoom: 19 }
 );
 
-var blankLayer = L.tileLayer('', { attribution: '' }).addTo(map);
+var blankLayer = L.tileLayer('', { attribution: '' });
 
 // ================== LAYER CONTROL ==================
 var layerControl = L.control.layers(
@@ -193,18 +193,27 @@ map.on('zoomend', function() {
 var legend = L.control({ position: 'bottomright' });
 legend.onAdd = function() {
   var div = L.DomUtil.create('div', 'info legend');
+  div.style.cssText =
+    'background:white;border:none;border-radius:8px;' +
+    'box-shadow:0 2px 12px rgba(0,0,0,0.18);font-family:Arial,sans-serif;' +
+    'font-size:12px;min-width:130px;overflow:hidden;padding:0;line-height:normal;';
+
   var sq = 'display:inline-block;width:16px;height:16px;box-sizing:border-box;' +
-           'border:1px solid rgba(0,0,0,0.4);vertical-align:middle;margin-right:6px;flex-shrink:0;';
+           'border:1px solid rgba(0,0,0,0.3);margin-right:8px;flex-shrink:0;border-radius:2px;';
+
   div.innerHTML =
-    '<b>Legendă</b>' +
-    '<div style="display:flex;align-items:center;margin-top:6px;">' +
-      '<span style="' + sq + 'background:hsl(210,70%,55%);"></span>Județe' +
-    '</div>' +
-    '<div style="display:flex;align-items:center;margin-top:4px;">' +
-      '<span style="' + sq + 'background:#ffe599;"></span>UAT' +
+    '<div style="background:#2c6fad;color:white;font-weight:700;font-size:12px;' +
+    'padding:8px 12px;letter-spacing:0.4px;">Legend\u0103</div>' +
+    '<div style="padding:8px 12px 10px 12px;">' +
+      '<div style="display:flex;align-items:center;padding:3px 0;">' +
+        '<span style="' + sq + 'background:hsl(210,70%,55%);"></span>Jude\u021be' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;padding:3px 0;">' +
+        '<span style="' + sq + 'background:#ffe599;border-color:rgba(0,0,0,0.4);"></span>UAT' +
+      '</div>' +
     '</div>';
   return div;
-};
+}
 legend.addTo(map);
 
 // ================== STATE ==================
@@ -343,5 +352,3 @@ function afiseazaUAT(judetSelectat) {
     });
 }
 } // END init wrapper
-
-
