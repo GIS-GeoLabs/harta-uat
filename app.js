@@ -169,7 +169,7 @@ var layerControl = L.control.layers(
 // ================== SCALE ==================
 L.control.scale({ imperial: false }).addTo(map);
 
-var MIN_UAT_LABEL_ZOOM = 10;
+var MIN_UAT_LABEL_ZOOM = 9;
 var uatActive = false;
 
 // zoomend gestioneaza labelurile bazat pe zoom si starea uatActive
@@ -298,8 +298,7 @@ fetch('judete.geojson')
           if (selectedJudetLayer) layerJudete.resetStyle(selectedJudetLayer);
           selectedJudetLayer = layer;
           layer.setStyle({ weight: 5, color: '#000', fillOpacity: 1 });
-          var center = layer.getBounds().getCenter();
-map.setView(center, 9, { animate: false });
+map.fitBounds(layer.getBounds(), { padding: [20, 20], animate: false, maxZoom: 9 });
           afiseazaUAT(feature.properties.Judet);
         });
       }
@@ -369,6 +368,7 @@ function afiseazaUAT(judetSelectat) {
     });
 }
 } // END init wrapper
+
 
 
 
