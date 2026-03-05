@@ -195,6 +195,7 @@ var MIN_UAT_LABEL_ZOOM = 10;
 var uatActive = false;
 
 map.on('zoomend', function() {
+  if (uatActive) return;
   var c = map.getContainer();
   if (map.getZoom() >= MIN_UAT_LABEL_ZOOM) {
     c.classList.remove('labels-hidden');
@@ -239,6 +240,8 @@ var resetViewBtn = document.getElementById('resetViewBtn');
 
 resetViewBtn.onclick = function() {
   map.setView([45.9, 24.9], 7);
+  uatActive = false;
+  map.getContainer().classList.add('labels-hidden'); 
   if (selectedJudetLayer) {
     layerJudete.resetStyle(selectedJudetLayer);
     selectedJudetLayer = null;
@@ -362,4 +365,5 @@ function afiseazaUAT(judetSelectat) {
     });
 }
 } // END init wrapper
+
 
