@@ -195,7 +195,6 @@ var MIN_UAT_LABEL_ZOOM = 10;
 var uatActive = false;
 
 map.on('zoomend', function() {
-  if (uatActive) return;
   var c = map.getContainer();
   if (map.getZoom() >= MIN_UAT_LABEL_ZOOM) {
     c.classList.remove('labels-hidden');
@@ -363,3 +362,4 @@ function afiseazaUAT(judetSelectat) {
     });
 }
 } // END init wrapper
+
