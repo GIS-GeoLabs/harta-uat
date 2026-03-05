@@ -298,7 +298,13 @@ fetch('judete.geojson')
           if (selectedJudetLayer) layerJudete.resetStyle(selectedJudetLayer);
           selectedJudetLayer = layer;
           layer.setStyle({ weight: 5, color: '#000', fillOpacity: 1 });
-map.fitBounds(layer.getBounds(), { paddingTopLeft: [160, 10], paddingBottomRight: [20, 20], animate: false, maxZoom: 9 });
+map.fitBounds(layer.getBounds(), { 
+  paddingTopLeft: [160, 10], 
+  paddingBottomRight: [20, 20], 
+  animate: false, 
+  maxZoom: 9 
+});
+
           afiseazaUAT(feature.properties.Judet);
         });
       }
@@ -368,6 +374,7 @@ function afiseazaUAT(judetSelectat) {
     });
 }
 } // END init wrapper
+
 
 
 
