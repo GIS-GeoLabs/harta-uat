@@ -233,7 +233,8 @@ legend.onAdd = function() {
 legend.addTo(map);
 
 // ================== STATE ==================
-var layerJudete = null, layerUAT = null, uatLabels = [];
+var layerJudete = null, layerUAT = null;
+var uatLabels = [], uatLabelsGroup = L.layerGroup();
 var selectedJudetLayer = null;
 var backBtn = document.getElementById('backBtn');
 var resetViewBtn = document.getElementById('resetViewBtn');
@@ -255,8 +256,8 @@ backBtn.onclick = function() {
     layerControl.removeLayer(layerUAT);
     map.removeLayer(layerUAT);
   }
-  for (var i = 0; i < uatLabels.length; i++) map.removeLayer(uatLabels[i]);
-  uatLabels = [];
+uatLabelsGroup.clearLayers();
+uatLabels = [];
   if (layerJudete) layerJudete.addTo(map);
   map.setView([45.9, 24.9], 7);
   backBtn.style.display = 'none';
@@ -307,8 +308,8 @@ function afiseazaUAT(judetSelectat) {
     layerControl.removeLayer(layerUAT);
     map.removeLayer(layerUAT);
   }
-  for (var i = 0; i < uatLabels.length; i++) map.removeLayer(uatLabels[i]);
-  uatLabels = [];
+uatLabelsGroup.clearLayers();
+uatLabels = [];
 
   var fileName = 'uat_judete/uat_' + norm(judetSelectat) + '.geojson';
 
@@ -333,8 +334,10 @@ function afiseazaUAT(judetSelectat) {
             interactive: false,
             keyboard: false
           }).addTo(map);
+          uatLabelsGroup.addTo(map);
 
-          uatLabels.push(label);
+        uatLabelsGroup.addLayer(label);
+        uatLabels.push(label);
 
           layer.on('mouseover', function() {
             layer.setStyle({ fillColor: '#f1c232', weight: 3 });
@@ -365,5 +368,6 @@ function afiseazaUAT(judetSelectat) {
     });
 }
 } // END init wrapper
+
 
 
