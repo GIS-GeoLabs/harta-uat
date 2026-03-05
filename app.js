@@ -1,9 +1,6 @@
 // ================== INIT WRAPPER ==================
 if (document.getElementById('apysis-map')) {
 
-// ================== MAP ==================
-
-
 // ================== UTILS ==================
 function norm(txt) {
   var s = txt.toString().trim().toUpperCase().normalize("NFD");
@@ -147,8 +144,8 @@ function getLabelLatLng(feature, layer) {
 
 // ================== MAP ==================
 var romaniaBounds = L.latLngBounds(
-  [43.5, 20.0],   // SV
-  [48.5, 30.5]    // NE
+  [43.5, 20.0],
+  [48.5, 30.5]
 );
 
 var map = L.map('apysis-map', {
@@ -157,7 +154,6 @@ var map = L.map('apysis-map', {
   maxBounds: romaniaBounds,
   maxBoundsViscosity: 1.0
 }).setView([45.9, 24.9], 7);
-
 
 // ================== BASE LAYERS ==================
 var osmLayer = L.tileLayer(
@@ -171,7 +167,6 @@ var osmLayer = L.tileLayer(
   }
 ).addTo(map);
 
-
 var satelliteLayer = L.tileLayer(
   'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
   {
@@ -182,7 +177,6 @@ var satelliteLayer = L.tileLayer(
 
 var blankLayer = L.tileLayer('', { attribution: '' });
 
-
 // ================== LAYER CONTROL ==================
 var layerControl = L.control.layers(
   {
@@ -191,17 +185,11 @@ var layerControl = L.control.layers(
     'Fără fundal': blankLayer
   },
   {},
-  {
-    position: 'topright',
-    collapsed: false
-  }
+  { position: 'topright', collapsed: false }
 ).addTo(map);
 
-
 // ================== SCALE ==================
-L.control.scale({
-  imperial: false
-}).addTo(map);
+L.control.scale({ imperial: false }).addTo(map);
 
 var MIN_UAT_LABEL_ZOOM = 10;
 var uatActive = false;
@@ -215,21 +203,27 @@ map.on('zoomend', function() {
     c.classList.add('labels-hidden');
   }
 });
+
+// ================== LEGENDA ==================
 var legend = L.control({ position: 'bottomright' });
 
 legend.onAdd = function() {
   var div = L.DomUtil.create('div', 'info legend');
 
-  div.innerHTML =
-    '<b>Legendă</b><br><br>' +
+  // stil comun pentru ambele patratele — box-sizing border-box + aceeasi bordura
+  var sq = 'display:inline-block;width:16px;height:16px;box-sizing:border-box;' +
+           'border:1px solid rgba(0,0,0,0.4);vertical-align:middle;margin-right:6px;flex-shrink:0;';
 
-    '<div style="margin-bottom:6px;">' +
-    '<span style="display:inline-block;width:14px;height:14px;background:hsl(210,70%,55%);border:2px solid #fff;margin-right:6px;"></span>' +
+  div.innerHTML =
+    '<b>Legendă</b>' +
+
+    '<div style="display:flex;align-items:center;margin-top:6px;">' +
+    '<span style="' + sq + 'background:hsl(210,70%,55%);"></span>' +
     'Județe' +
     '</div>' +
 
-    '<div>' +
-    '<span style="display:inline-block;width:14px;height:14px;background:#ffe599;border:1px solid #000;margin-right:6px;"></span>' +
+    '<div style="display:flex;align-items:center;margin-top:4px;">' +
+    '<span style="' + sq + 'background:#ffe599;"></span>' +
     'UAT' +
     '</div>';
 
@@ -237,14 +231,15 @@ legend.onAdd = function() {
 };
 
 legend.addTo(map);
+
+// ================== STATE ==================
 var layerJudete = null, layerUAT = null, uatLabels = [];
-  var selectedJudetLayer = null;
+var selectedJudetLayer = null;
 var backBtn = document.getElementById('backBtn');
-  var resetViewBtn = document.getElementById('resetViewBtn');
+var resetViewBtn = document.getElementById('resetViewBtn');
 
 resetViewBtn.onclick = function() {
   map.setView([45.9, 24.9], 7);
-
   if (selectedJudetLayer) {
     layerJudete.resetStyle(selectedJudetLayer);
     selectedJudetLayer = null;
@@ -266,7 +261,7 @@ backBtn.onclick = function() {
   map.getContainer().classList.add('labels-hidden');
 };
 
-// ================== JUDEȚE ==================
+// ================== JUDETE ==================
 fetch('judete.geojson')
   .then(function(r) { return r.json(); })
   .then(function(data) {
@@ -287,26 +282,15 @@ fetch('judete.geojson')
         layer.on('mouseout', function() {
           layer.setStyle({ weight: 2.5, fillOpacity: 0.9 });
         });
-layer.on('click', function() {
-
-  // reset highlight anterior
-  if (selectedJudetLayer) {
-    layerJudete.resetStyle(selectedJudetLayer);
-  }
-
-  // setăm noul highlight
-  selectedJudetLayer = layer;
-
-  layer.setStyle({
-    weight: 5,
-    color: '#000',
-    fillOpacity: 1
-  });
-
-  map.fitBounds(layer.getBounds(), { padding: [20, 20] });
-
-  afiseazaUAT(feature.properties.Judet);
-});
+        layer.on('click', function() {
+          if (selectedJudetLayer) {
+            layerJudete.resetStyle(selectedJudetLayer);
+          }
+          selectedJudetLayer = layer;
+          layer.setStyle({ weight: 5, color: '#000', fillOpacity: 1 });
+          map.fitBounds(layer.getBounds(), { padding: [20, 20] });
+          afiseazaUAT(feature.properties.Judet);
+        });
       }
     }).addTo(map);
 
@@ -379,9 +363,3 @@ function afiseazaUAT(judetSelectat) {
     });
 }
 } // END init wrapper
-
-
-
-
-
-
