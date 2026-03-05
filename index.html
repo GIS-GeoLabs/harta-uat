@@ -83,12 +83,19 @@
       display: none;
     }
 
-    /* ===== Butoane stânga ===== */
-    #backBtn,
-    #resetViewBtn {
+    /* ===== Container butoane stânga ===== */
+    #map-controls {
       position: absolute;
+      top: 80px;
       left: 10px;
       z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    #backBtn,
+    #resetViewBtn {
       padding: 0;
       background: none;
       border: none;
@@ -103,15 +110,9 @@
     }
 
     #backBtn {
-      top: 80px;
       display: none;
     }
 
-    #resetViewBtn {
-      top: 130px;
-    }
-
-    /* Structura interna a butoanelor — via JS */
     #backBtn:hover .btn-body,
     #resetViewBtn:hover .btn-body {
       background: #f4f8fd;
@@ -182,14 +183,16 @@
   <div id="apysis-map-wrapper">
     <div id="apysis-map"></div>
 
-    <button id="backBtn">
-      <div style="background:#2c6fad;color:white;font-weight:700;font-size:12px;padding:8px 12px;letter-spacing:0.4px;">Navigare</div>
-      <div class="btn-body" style="padding:8px 12px;background:white;color:#333;font-size:12px;transition:background 0.15s;">&#8592; Înapoi la județe</div>
-    </button>
-    <button id="resetViewBtn">
-      <div style="background:#2c6fad;color:white;font-weight:700;font-size:12px;padding:8px 12px;letter-spacing:0.4px;">Vizualizare</div>
-      <div class="btn-body" style="padding:8px 12px;background:white;color:#333;font-size:12px;transition:background 0.15s;">&#8635; Reset hartă</div>
-    </button>
+    <div id="map-controls">
+      <button id="backBtn">
+        <div style="background:#2c6fad;color:white;font-weight:700;font-size:12px;padding:8px 12px;letter-spacing:0.4px;">Navigare</div>
+        <div class="btn-body" style="padding:8px 12px;background:white;color:#333;font-size:12px;transition:background 0.15s;">&#8592; Înapoi la județe</div>
+      </button>
+      <button id="resetViewBtn">
+        <div style="background:#2c6fad;color:white;font-weight:700;font-size:12px;padding:8px 12px;letter-spacing:0.4px;">Vizualizare</div>
+        <div class="btn-body" style="padding:8px 12px;background:white;color:#333;font-size:12px;transition:background 0.15s;">&#8635; Reset hartă</div>
+      </button>
+    </div>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
