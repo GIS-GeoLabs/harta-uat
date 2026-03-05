@@ -23,9 +23,9 @@ function stringToHash(str) {
 
 function getBlueFromName(name) {
   var hash = stringToHash(norm(name));
-  var hue = 210;
-  var saturation = 60 + (hash % 20);
-  var lightness = 45 + (hash % 15);
+  var hue = 208 + (hash % 8);        // 208-215 — albastru pur, ușor variabil
+  var saturation = 70 + (hash % 25); // 70-94% — culori vii
+  var lightness = 48 + (hash % 10);  // 48-57% — interval strâns, fără extreme
   return 'hsl(' + hue + ',' + saturation + '%,' + lightness + '%)';
 }
 
@@ -343,3 +343,4 @@ function afiseazaUAT(judetSelectat) {
     });
 }
 } // END init wrapper
+
