@@ -207,27 +207,34 @@ var selectedJudetLayer = null;
 var backBtn = document.getElementById('backBtn');
 var resetViewBtn = document.getElementById('resetViewBtn');
 
+function resetUATLayers() {
+  uatLabelsGroup.clearLayers();
+  map.removeLayer(uatLabelsGroup);
+  uatLabels = [];
+  if (layerUAT) {
+    layerControl.removeLayer(layerUAT);
+    map.removeLayer(layerUAT);
+    layerUAT = null;
+  }
+}
+
 resetViewBtn.onclick = function() {
-  map.setView([45.9, 24.9], 7);
   uatActive = false;
+  resetUATLayers();
   map.getContainer().classList.add('labels-hidden');
   if (selectedJudetLayer) {
     layerJudete.resetStyle(selectedJudetLayer);
     selectedJudetLayer = null;
   }
+  map.setView([45.9, 24.9], 7, { animate: false });
 };
 
 // ================== RESET ==================
 backBtn.onclick = function() {
   uatActive = false;
-  if (layerUAT) {
-    layerControl.removeLayer(layerUAT);
-    map.removeLayer(layerUAT);
-  }
-  uatLabelsGroup.clearLayers();
-  uatLabels = [];
-  if (layerJudete) layerJudete.addTo(map);
-  map.setView([45.9, 24.9], 7);
+  resetUATLayers();
+  if (layerJudete && !map.hasLayer(layerJudete)) layerJudete.addTo(map);
+  map.setView([45.9, 24.9], 7, { animate: false });
   backBtn.style.display = 'none';
   map.getContainer().classList.add('labels-hidden');
 };
@@ -269,12 +276,7 @@ fetch('judete.geojson')
 function afiseazaUAT(judetSelectat) {
   uatActive = true;
   if (layerJudete) map.removeLayer(layerJudete);
-  if (layerUAT) {
-    layerControl.removeLayer(layerUAT);
-    map.removeLayer(layerUAT);
-  }
-  uatLabelsGroup.clearLayers();
-  uatLabels = [];
+  resetUATLayers();
 
   var fileName = 'uat_judete/uat_' + norm(judetSelectat) + '.geojson';
 
