@@ -336,7 +336,7 @@ function afiseazaUAT(judetSelectat) {
           layer.on('click', function() {
             var siruta = String(feature.properties.SIRUTA || '').trim();
             if (siruta !== '') {
-              window.location.href = '/apysis/siruta=' + siruta;
+              window.location.href = '/apysis/siruta/' + siruta;
             }
           });
         }
@@ -352,4 +352,5 @@ function afiseazaUAT(judetSelectat) {
     });
 }
 } // END init wrapper
+
 
