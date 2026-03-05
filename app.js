@@ -299,12 +299,17 @@ layer.on('click', function() {
   selectedJudetLayer = layer;
   layer.setStyle({ weight: 5, color: '#000', fillOpacity: 1 });
 
-  map.fitBounds(layer.getBounds(), { animate: false });
+  console.log('click judet, zoom inainte:', map.getZoom()); // test incarcare
+  map.fitBounds(layer.getBounds(), { 
+    paddingTopLeft: [200, 10], 
+    paddingBottomRight: [20, 20],
+    animate: false
+  });
   if (map.getZoom() > 9) map.setZoom(9, { animate: false });
-  map.panBy([-100, 0], { animate: false });
 
   afiseazaUAT(feature.properties.Judet);
 });
+
 
 
       }
@@ -374,6 +379,7 @@ function afiseazaUAT(judetSelectat) {
     });
 }
 } // END init wrapper
+
 
 
 
