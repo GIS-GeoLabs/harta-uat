@@ -93,7 +93,6 @@ function getLabelLatLng(feature, layer) {
   if (feature.properties.LabelLat && feature.properties.LabelLng) {
     return L.latLng(feature.properties.LabelLat, feature.properties.LabelLng);
   }
-
   var rings = null;
   if (feature.geometry.type === 'Polygon') {
     rings = feature.geometry.coordinates;
@@ -101,20 +100,16 @@ function getLabelLatLng(feature, layer) {
     rings = getLargestPolygonRings(feature.geometry.coordinates);
   }
   if (!rings) return layer.getBounds().getCenter();
-
   var ring = rings[0];
 
-  // 1. centroid area-weighted
   var c = ringCentroid(ring);
   if (pointInRing(c, ring)) return L.latLng(c[1], c[0]);
 
-  // 2. centrul bbox
   var bounds = layer.getBounds();
   var bx = (bounds.getWest() + bounds.getEast()) / 2;
   var by = (bounds.getNorth() + bounds.getSouth()) / 2;
   if (pointInRing([bx, by], ring)) return L.latLng(by, bx);
 
-  // 3. scanare verticală pe axa centrală — găsim cel mai lung segment interior
   var cx = bx;
   var ys = [];
   for (var i = 0, j = ring.length - 1; i < ring.length; j = i++) {
@@ -129,24 +124,17 @@ function getLabelLatLng(feature, layer) {
   var bestLen = -1, bestY = by;
   for (var k = 0; k + 1 < ys.length; k += 2) {
     var len = ys[k + 1] - ys[k];
-    if (len > bestLen) {
-      bestLen = len;
-      bestY = (ys[k] + ys[k + 1]) / 2;
-    }
+    if (len > bestLen) { bestLen = len; bestY = (ys[k] + ys[k + 1]) / 2; }
   }
   if (bestLen > 0) return L.latLng(bestY, cx);
 
-  // 4. fallback final — media vârfurilor
   var mx = 0, my = 0, n = ring.length - 1;
   for (var v = 0; v < n; v++) { mx += ring[v][0]; my += ring[v][1]; }
   return L.latLng(my / n, mx / n);
 }
 
 // ================== MAP ==================
-var romaniaBounds = L.latLngBounds(
-  [43.5, 20.0],
-  [48.5, 30.5]
-);
+var romaniaBounds = L.latLngBounds([43.5, 20.0], [48.5, 30.5]);
 
 var map = L.map('apysis-map', {
   minZoom: 6,
@@ -156,34 +144,24 @@ var map = L.map('apysis-map', {
 }).setView([45.9, 24.9], 7);
 
 // ================== BASE LAYERS ==================
-var osmLayer = L.tileLayer(
-  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-  {
-    attribution: '&copy; OpenStreetMap',
-    maxZoom: 19,
-    updateWhenIdle: true,
-    updateWhenZooming: false,
-    keepBuffer: 2
-  }
-).addTo(map);
+var osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap',
+  maxZoom: 19,
+  updateWhenIdle: true,
+  updateWhenZooming: false,
+  keepBuffer: 2
+}).addTo(map);
 
 var satelliteLayer = L.tileLayer(
   'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-  {
-    attribution: 'Tiles © Esri',
-    maxZoom: 19
-  }
+  { attribution: 'Tiles © Esri', maxZoom: 19 }
 );
 
 var blankLayer = L.tileLayer('', { attribution: '' });
 
 // ================== LAYER CONTROL ==================
 var layerControl = L.control.layers(
-  {
-    'OpenStreetMap': osmLayer,
-    'Satelit': satelliteLayer,
-    'Fără fundal': blankLayer
-  },
+  { 'OpenStreetMap': osmLayer, 'Satelit': satelliteLayer, 'Fără fundal': blankLayer },
   {},
   { position: 'topright', collapsed: false }
 ).addTo(map);
@@ -206,30 +184,20 @@ map.on('zoomend', function() {
 
 // ================== LEGENDA ==================
 var legend = L.control({ position: 'bottomright' });
-
 legend.onAdd = function() {
   var div = L.DomUtil.create('div', 'info legend');
-
-  // stil comun pentru ambele patratele — box-sizing border-box + aceeasi bordura
   var sq = 'display:inline-block;width:16px;height:16px;box-sizing:border-box;' +
            'border:1px solid rgba(0,0,0,0.4);vertical-align:middle;margin-right:6px;flex-shrink:0;';
-
   div.innerHTML =
     '<b>Legendă</b>' +
-
     '<div style="display:flex;align-items:center;margin-top:6px;">' +
-    '<span style="' + sq + 'background:hsl(210,70%,55%);"></span>' +
-    'Județe' +
+      '<span style="' + sq + 'background:hsl(210,70%,55%);"></span>Județe' +
     '</div>' +
-
     '<div style="display:flex;align-items:center;margin-top:4px;">' +
-    '<span style="' + sq + 'background:#ffe599;"></span>' +
-    'UAT' +
+      '<span style="' + sq + 'background:#ffe599;"></span>UAT' +
     '</div>';
-
   return div;
 };
-
 legend.addTo(map);
 
 // ================== STATE ==================
@@ -242,7 +210,7 @@ var resetViewBtn = document.getElementById('resetViewBtn');
 resetViewBtn.onclick = function() {
   map.setView([45.9, 24.9], 7);
   uatActive = false;
-  map.getContainer().classList.add('labels-hidden'); 
+  map.getContainer().classList.add('labels-hidden');
   if (selectedJudetLayer) {
     layerJudete.resetStyle(selectedJudetLayer);
     selectedJudetLayer = null;
@@ -256,8 +224,8 @@ backBtn.onclick = function() {
     layerControl.removeLayer(layerUAT);
     map.removeLayer(layerUAT);
   }
-uatLabelsGroup.clearLayers();
-uatLabels = [];
+  uatLabelsGroup.clearLayers();
+  uatLabels = [];
   if (layerJudete) layerJudete.addTo(map);
   map.setView([45.9, 24.9], 7);
   backBtn.style.display = 'none';
@@ -286,9 +254,7 @@ fetch('judete.geojson')
           layer.setStyle({ weight: 2.5, fillOpacity: 0.9 });
         });
         layer.on('click', function() {
-          if (selectedJudetLayer) {
-            layerJudete.resetStyle(selectedJudetLayer);
-          }
+          if (selectedJudetLayer) layerJudete.resetStyle(selectedJudetLayer);
           selectedJudetLayer = layer;
           layer.setStyle({ weight: 5, color: '#000', fillOpacity: 1 });
           map.fitBounds(layer.getBounds(), { padding: [20, 20] });
@@ -296,7 +262,6 @@ fetch('judete.geojson')
         });
       }
     }).addTo(map);
-
     layerControl.addOverlay(layerJudete, 'Județe');
   });
 
@@ -308,8 +273,8 @@ function afiseazaUAT(judetSelectat) {
     layerControl.removeLayer(layerUAT);
     map.removeLayer(layerUAT);
   }
-uatLabelsGroup.clearLayers();
-uatLabels = [];
+  uatLabelsGroup.clearLayers();
+  uatLabels = [];
 
   var fileName = 'uat_judete/uat_' + norm(judetSelectat) + '.geojson';
 
@@ -333,11 +298,9 @@ uatLabels = [];
             }),
             interactive: false,
             keyboard: false
-          }).addTo(map);
-          uatLabelsGroup.addTo(map);
-
-        uatLabelsGroup.addLayer(label);
-        uatLabels.push(label);
+          });
+          uatLabelsGroup.addLayer(label);
+          uatLabels.push(label);
 
           layer.on('mouseover', function() {
             layer.setStyle({ fillColor: '#f1c232', weight: 3 });
@@ -359,6 +322,7 @@ uatLabels = [];
         }
       }).addTo(map);
 
+      uatLabelsGroup.addTo(map);
       layerControl.addOverlay(layerUAT, 'UAT-uri');
       backBtn.style.display = 'block';
       map.getContainer().classList.remove('labels-hidden');
@@ -368,6 +332,3 @@ uatLabels = [];
     });
 }
 } // END init wrapper
-
-
-
