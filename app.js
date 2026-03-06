@@ -279,21 +279,27 @@ resetViewBtn.onclick = function() {
 };
 
 
-document.getElementById('toggle-transparent').addEventListener('change', function() {
-  var transparent = this.checked;
-  // aplica pe UAT daca e activ
-  if (layerUAT) {
-    layerUAT.eachLayer(function(layer) {
-      layer.setStyle({ fillOpacity: transparent ? 0 : 0.9 });
-    });
-  }
-  // aplica pe judete daca sunt vizibile
-  if (layerJudete) {
-    layerJudete.eachLayer(function(layer) {
-      layer.setStyle({ fillOpacity: transparent ? 0 : 0.9 });
-    });
-  }
-});
+// ================== TRANSPARENT TOGGLE ==================
+var toggleTransparent = document.getElementById('toggle-transparent');
+if (toggleTransparent) {
+  toggleTransparent.addEventListener('click', function(e) {
+    e.stopPropagation();
+  });
+  toggleTransparent.addEventListener('change', function() {
+    var transparent = this.checked;
+    if (layerUAT) {
+      layerUAT.eachLayer(function(layer) {
+        layer.setStyle({ fillOpacity: transparent ? 0 : 0.9 });
+      });
+    }
+    if (layerJudete) {
+      layerJudete.eachLayer(function(layer) {
+        layer.setStyle({ fillOpacity: transparent ? 0 : 0.9 });
+      });
+    }
+  });
+}
+
 
 
 // ================== RESET ==================
@@ -454,4 +460,5 @@ if (typeof ResizeObserver !== 'undefined') {
 }
 
 } // END init wrapper
+
 
