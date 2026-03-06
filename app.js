@@ -153,8 +153,9 @@ var map = L.map('apysis-map', {
   maxBounds: romaniaBounds,
   maxBoundsViscosity: 1.0
 }).setView([45.9, 24.9], 7);
-  if (isMobile) {
+if (isMobile) {
   map.fitBounds([[43.5, 19.0], [48.5, 30.5]], { padding: [20, 20] });
+  map.setZoom(map.getZoom() + 1, { animate: false });
 }
 
 
@@ -473,6 +474,7 @@ if (typeof ResizeObserver !== 'undefined') {
 }
 
 } // END init wrapper
+
 
 
 
