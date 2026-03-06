@@ -144,14 +144,17 @@ function getLabelLatLng(feature, layer) {
 }
 
 // ================== MAP ==================
+// ================== MAP ==================
 var romaniaBounds = L.latLngBounds([43.5, 19.0], [48.5, 30.5]);
+var isMobile = window.innerWidth < 768;
 
 var map = L.map('apysis-map', {
   minZoom: 6,
   maxZoom: 18,
   maxBounds: romaniaBounds,
   maxBoundsViscosity: 1.0
-}).setView([45.9, 24.9], 7);
+}).setView([45.9, 24.9], isMobile ? 6 : 7);
+
 
 // ================== BASE LAYERS ==================
 var osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -178,7 +181,7 @@ map.on('baselayerchange', function(e) {
 var layerControl = L.control.layers(
   { 'OpenStreetMap': osmLayer, 'Satelit': satelliteLayer, 'Fără fundal': blankLayer },
   {},
-  { position: 'topright', collapsed: false }
+  { position: 'topright', collapsed: isMobile }
 ).addTo(map);
 
 // ================== SCALE ==================
@@ -460,5 +463,6 @@ if (typeof ResizeObserver !== 'undefined') {
 }
 
 } // END init wrapper
+
 
 
