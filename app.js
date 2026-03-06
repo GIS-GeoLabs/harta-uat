@@ -319,7 +319,6 @@ fetch(BASE_ROOT + 'judete.geojson')
     }).addTo(map);
     layerControl.addOverlay(layerJudete, 'Județe');
   });
-;
 
 // ================== UAT ==================
 function afiseazaUAT(judetSelectat) {
@@ -398,6 +397,7 @@ if (typeof ResizeObserver !== 'undefined') {
 }
 
 } // END init wrapper
+
 
 
 
