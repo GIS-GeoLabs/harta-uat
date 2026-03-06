@@ -255,18 +255,33 @@ resetViewBtn.onclick = function() {
   resetUATLayers();
   backBtn.style.display = 'none';
 
-  // 2. Reafișează județele
+  // 2. Resetează județ selectat ÎNAINTE de a readăuga layerul
+  if (selectedJudetLayer) {
+    layerJudete.resetStyle(selectedJudetLayer);
+    if (document.getElementById('toggle-transparent').checked) {
+      selectedJudetLayer.setStyle({ fillOpacity: 0 });
+    }
+    selectedJudetLayer = null;
+  }
+
+  // 3. Reafișează județele
   if (layerJudete && !map.hasLayer(layerJudete)) layerJudete.addTo(map);
 
-  // 3. Resetează județ selectat
-// DUPA:
-if (selectedJudetLayer) {
-  layerJudete.resetStyle(selectedJudetLayer);
-  if (document.getElementById('toggle-transparent').checked) {
-    selectedJudetLayer.setStyle({ fillOpacity: 0 });
+  // 4. Păstrează fundalul activ
+  if (!map.hasLayer(activeBaseLayer)) {
+    map.removeLayer(osmLayer);
+    map.removeLayer(satelliteLayer);
+    map.removeLayer(blankLayer);
+    activeBaseLayer.addTo(map);
   }
-  selectedJudetLayer = null;
-}
+
+  // 5. Centrare România
+  map.setView([45.9, 24.9], 7, { animate: false });
+
+  // 6. Ascunde labeluri UAT
+  map.getContainer().classList.add('labels-hidden');
+};
+
 
 
   // 4. Fundal gol
@@ -455,6 +470,7 @@ if (typeof ResizeObserver !== 'undefined') {
 }
 
 } // END init wrapper
+
 
 
 
