@@ -315,13 +315,16 @@ fetch(BASE_ROOT + 'judete.geojson')
         layer.bindTooltip(feature.properties.Judet, {
           permanent: true, direction: 'center', className: 'label-judet'
         });
-        layer.on('mouseover', function() {
-          layer.setStyle({ weight: 5, fillOpacity: 1 });
-          layer.bringToFront();
-        });
-        layer.on('mouseout', function() {
-          layer.setStyle({ weight: 4, fillOpacity: 0.9 });
-        });
+layer.on('mouseover', function() {
+  var transp = document.getElementById('toggle-transparent').checked;
+  layer.setStyle({ weight: 5, fillOpacity: transp ? 0 : 1 });
+  layer.bringToFront();
+});
+layer.on('mouseout', function() {
+  var transp = document.getElementById('toggle-transparent').checked;
+  layer.setStyle({ weight: 4, fillOpacity: transp ? 0 : 0.9 });
+});
+
 layer.on('click', function() {
   if (selectedJudetLayer) layerJudete.resetStyle(selectedJudetLayer);
   selectedJudetLayer = layer;
@@ -384,17 +387,19 @@ function afiseazaUAT(judetSelectat) {
           uatLabelsGroup.addLayer(label);
           uatLabels.push(label);
 
-          layer.on('mouseover', function() {
-            layer.setStyle({ fillOpacity: 1, weight: 5 });
-            layer.bringToFront();
-            var el = label.getElement();
-            if (el) el.querySelector('.label-uat').classList.add('label-hover');
-          });
-          layer.on('mouseout', function() {
-            layer.setStyle({ fillColor: feature.properties._color, fillOpacity: 0.9, weight: 4 });
-            var el = label.getElement();
-            if (el) el.querySelector('.label-uat').classList.remove('label-hover');
-          });
+layer.on('mouseover', function() {
+  var transp = document.getElementById('toggle-transparent').checked;
+  layer.setStyle({ fillOpacity: transp ? 0 : 1, weight: 5 });
+  layer.bringToFront();
+  var el = label.getElement();
+  if (el) el.querySelector('.label-uat').classList.add('label-hover');
+});
+layer.on('mouseout', function() {
+  var transp = document.getElementById('toggle-transparent').checked;
+  layer.setStyle({ fillColor: feature.properties._color, fillOpacity: transp ? 0 : 0.9, weight: 4 });
+  var el = label.getElement();
+  if (el) el.querySelector('.label-uat').classList.remove('label-hover');
+});
           layer.on('click', function() {
             var siruta = String(feature.properties.SIRUTA || '').trim();
             if (siruta !== '') {
@@ -431,6 +436,7 @@ if (typeof ResizeObserver !== 'undefined') {
 }
 
 } // END init wrapper
+
 
 
 
