@@ -260,9 +260,12 @@ resetViewBtn.onclick = function() {
   }
 
   // 4. Fundal gol
+if (!map.hasLayer(activeBaseLayer)) {
   map.removeLayer(osmLayer);
   map.removeLayer(satelliteLayer);
-  if (!map.hasLayer(blankLayer)) blankLayer.addTo(map);
+  map.removeLayer(blankLayer);
+  activeBaseLayer.addTo(map);
+}
 
   // 5. Centrare România
   map.setView([45.9, 24.9], 7, { animate: false });
@@ -291,6 +294,12 @@ document.getElementById('toggle-transparent').addEventListener('change', functio
 backBtn.onclick = function() {
   uatActive = false;
   resetUATLayers();
+  if (!map.hasLayer(activeBaseLayer)) {
+  map.removeLayer(osmLayer);
+  map.removeLayer(satelliteLayer);
+  map.removeLayer(blankLayer);
+  activeBaseLayer.addTo(map);
+}
   if (selectedJudetLayer) {
     layerJudete.resetStyle(selectedJudetLayer);
     selectedJudetLayer = null;
@@ -436,6 +445,7 @@ if (typeof ResizeObserver !== 'undefined') {
 }
 
 } // END init wrapper
+
 
 
 
