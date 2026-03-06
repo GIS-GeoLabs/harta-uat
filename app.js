@@ -281,23 +281,6 @@ resetViewBtn.onclick = function() {
   // 6. Ascunde labeluri UAT
   map.getContainer().classList.add('labels-hidden');
 };
-
-
-
-  // 4. Fundal gol
-if (!map.hasLayer(activeBaseLayer)) {
-  map.removeLayer(osmLayer);
-  map.removeLayer(satelliteLayer);
-  map.removeLayer(blankLayer);
-  activeBaseLayer.addTo(map);
-}
-
-  // 5. Centrare România
-  map.setView([45.9, 24.9], 7, { animate: false });
-
-  // 6. Ascunde labeluri UAT
-  map.getContainer().classList.add('labels-hidden');
-};
 document.getElementById('toggle-transparent').addEventListener('change', function() {
   var transparent = this.checked;
   // aplica pe UAT daca e activ
@@ -470,6 +453,7 @@ if (typeof ResizeObserver !== 'undefined') {
 }
 
 } // END init wrapper
+
 
 
 
