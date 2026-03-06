@@ -168,6 +168,11 @@ var satelliteLayer = L.tileLayer(
 );
 
 var blankLayer = L.tileLayer('', { attribution: '' }).addTo(map);
+  var activeBaseLayer = blankLayer;  // ← retine stratul activ curent
+
+map.on('baselayerchange', function(e) {
+  activeBaseLayer = e.layer;  // ← actualizeaza cand utilizatorul schimba fundalul
+});
 
 // ================== LAYER CONTROL ==================
 var layerControl = L.control.layers(
@@ -254,10 +259,15 @@ resetViewBtn.onclick = function() {
   if (layerJudete && !map.hasLayer(layerJudete)) layerJudete.addTo(map);
 
   // 3. Resetează județ selectat
-  if (selectedJudetLayer) {
-    layerJudete.resetStyle(selectedJudetLayer);
-    selectedJudetLayer = null;
+// DUPA:
+if (selectedJudetLayer) {
+  layerJudete.resetStyle(selectedJudetLayer);
+  if (document.getElementById('toggle-transparent').checked) {
+    selectedJudetLayer.setStyle({ fillOpacity: 0 });
   }
+  selectedJudetLayer = null;
+}
+
 
   // 4. Fundal gol
 if (!map.hasLayer(activeBaseLayer)) {
@@ -337,7 +347,7 @@ layer.on('mouseout', function() {
 layer.on('click', function() {
   if (selectedJudetLayer) layerJudete.resetStyle(selectedJudetLayer);
   selectedJudetLayer = layer;
-  layer.setStyle({ weight: 5, color: '#000', fillOpacity: 1 });
+layer.setStyle({ weight: 5, color: '#000', fillOpacity: document.getElementById('toggle-transparent').checked ? 0 : 1 });
 
   var p = feature.properties;
   if (p.CenterLat && p.CenterLng && p.ZoomLevel) {
@@ -445,6 +455,7 @@ if (typeof ResizeObserver !== 'undefined') {
 }
 
 } // END init wrapper
+
 
 
 
