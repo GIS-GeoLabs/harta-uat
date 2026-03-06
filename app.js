@@ -315,18 +315,19 @@ layer.on('click', function() {
 
   var p = feature.properties;
   if (p.CenterLat && p.CenterLng && p.ZoomLevel) {
-    // foloseste centrul si zoom-ul din GeoJSON
     map.setView([p.CenterLat, p.CenterLng], p.ZoomLevel, { animate: false });
   } else {
-    // fallback automat pentru restul judetelor
     map.fitBounds(layer.getBounds(), {
-      paddingTopLeft: [200, 10],
-      paddingBottomRight: [20, 20],
+      paddingTopLeft: [220, 20],
+      paddingBottomRight: [40, 40],
       animate: false
     });
+    // forteaza zoom minim 9 dupa fitBounds
+    if (map.getZoom() < 9) map.setZoom(9, { animate: false });
   }
   afiseazaUAT(feature.properties.Judet);
 });
+
 
       }
     }).addTo(map);
@@ -410,6 +411,7 @@ if (typeof ResizeObserver !== 'undefined') {
 }
 
 } // END init wrapper
+
 
 
 
