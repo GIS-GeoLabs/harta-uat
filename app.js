@@ -250,12 +250,10 @@ function resetUATLayers() {
 }
 
 resetViewBtn.onclick = function() {
-  // 1. Ieși din modul UAT
   uatActive = false;
   resetUATLayers();
   backBtn.style.display = 'none';
 
-  // 2. Resetează județ selectat ÎNAINTE de a readăuga layerul
   if (selectedJudetLayer) {
     layerJudete.resetStyle(selectedJudetLayer);
     if (document.getElementById('toggle-transparent').checked) {
@@ -264,22 +262,17 @@ resetViewBtn.onclick = function() {
     selectedJudetLayer = null;
   }
 
-  // 3. Reafișează județele
   if (layerJudete && !map.hasLayer(layerJudete)) layerJudete.addTo(map);
 
-  // 4. Păstrează fundalul activ
-map.removeLayer(osmLayer);
-map.removeLayer(satelliteLayer);
-map.removeLayer(blankLayer);
-activeBaseLayer.addTo(map);
-  }
+  map.removeLayer(osmLayer);
+  map.removeLayer(satelliteLayer);
+  map.removeLayer(blankLayer);
+  activeBaseLayer.addTo(map);
 
-  // 5. Centrare România
   map.setView([45.9, 24.9], 7, { animate: false });
-
-  // 6. Ascunde labeluri UAT
   map.getContainer().classList.add('labels-hidden');
 };
+
 document.getElementById('toggle-transparent').addEventListener('change', function() {
   var transparent = this.checked;
   // aplica pe UAT daca e activ
@@ -301,16 +294,20 @@ document.getElementById('toggle-transparent').addEventListener('change', functio
 backBtn.onclick = function() {
   uatActive = false;
   resetUATLayers();
-map.removeLayer(osmLayer);
-map.removeLayer(satelliteLayer);
-map.removeLayer(blankLayer);
-activeBaseLayer.addTo(map);
-}
+
   if (selectedJudetLayer) {
     layerJudete.resetStyle(selectedJudetLayer);
+    if (document.getElementById('toggle-transparent').checked) {
+      selectedJudetLayer.setStyle({ fillOpacity: 0 });
+    }
     selectedJudetLayer = null;
   }
   if (layerJudete && !map.hasLayer(layerJudete)) layerJudete.addTo(map);
+  map.removeLayer(osmLayer);
+  map.removeLayer(satelliteLayer);
+  map.removeLayer(blankLayer);
+  activeBaseLayer.addTo(map);
+
   map.setView([45.9, 24.9], 7, { animate: false });
   backBtn.style.display = 'none';
   map.getContainer().classList.add('labels-hidden');
@@ -451,31 +448,3 @@ if (typeof ResizeObserver !== 'undefined') {
 }
 
 } // END init wrapper
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
