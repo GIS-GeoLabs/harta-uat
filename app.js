@@ -316,7 +316,6 @@ fetch(BASE_ROOT + 'judete.geojson')
             paddingTopLeft: [200, 10],
             paddingBottomRight: [20, 20],
             animate: false,
-            maxZoom: 9
           });
           afiseazaUAT(feature.properties.Judet);
         });
@@ -402,6 +401,7 @@ if (typeof ResizeObserver !== 'undefined') {
 }
 
 } // END init wrapper
+
 
 
 
