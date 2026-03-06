@@ -151,10 +151,12 @@ var map = L.map('apysis-map', {
   maxZoom: 18,
   maxBounds: romaniaBounds,
   maxBoundsViscosity: 1.0
-}).setView([45.9, 24.9], 7);
+});
+
 if (isMobile) {
-  map.fitBounds([[43.5, 19.0], [48.5, 30.5]], { padding: [20, 20] });
-  map.setZoom(map.getZoom() + 1, { animate: false });
+  map.setView([45.9, 24.9], 8, { animate: false });  // zoom mai mare pe mobil
+} else {
+  map.setView([45.9, 24.9], 7, { animate: false });  // cum era pe desktop
 }
 
 // ================== BASE LAYERS ==================
@@ -476,6 +478,7 @@ window.addEventListener('load', function() {
 });
 
 } // END init wrapper
+
 
 
 
