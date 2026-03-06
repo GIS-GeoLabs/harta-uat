@@ -270,7 +270,21 @@ resetViewBtn.onclick = function() {
   // 6. Ascunde labeluri UAT
   map.getContainer().classList.add('labels-hidden');
 };
-
+document.getElementById('toggle-transparent').addEventListener('change', function() {
+  var transparent = this.checked;
+  // aplica pe UAT daca e activ
+  if (layerUAT) {
+    layerUAT.eachLayer(function(layer) {
+      layer.setStyle({ fillOpacity: transparent ? 0 : 0.9 });
+    });
+  }
+  // aplica pe judete daca sunt vizibile
+  if (layerJudete) {
+    layerJudete.eachLayer(function(layer) {
+      layer.setStyle({ fillOpacity: transparent ? 0 : 0.9 });
+    });
+  }
+});
 
 
 // ================== RESET ==================
@@ -389,7 +403,13 @@ function afiseazaUAT(judetSelectat) {
           });
         }
       }).addTo(map);
-
+// sincronizeaza transparenta la incarcarea UAT
+var isTransparent = document.getElementById('toggle-transparent').checked;
+if (isTransparent) {
+  layerUAT.eachLayer(function(layer) {
+    layer.setStyle({ fillOpacity: 0 });
+  });
+}
       uatLabelsGroup.addTo(map);
       layerControl.addOverlay(layerUAT, 'UAT-uri');
       backBtn.style.display = 'block';
@@ -411,6 +431,7 @@ if (typeof ResizeObserver !== 'undefined') {
 }
 
 } // END init wrapper
+
 
 
 
