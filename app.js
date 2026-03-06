@@ -240,7 +240,6 @@ var layerJudete = null, layerUAT = null;
 var uatLabels = [], uatLabelsGroup = L.layerGroup();
 var selectedJudetLayer = null;
 var backBtn = document.getElementById('backBtn');
-var resetViewBtn = document.getElementById('resetViewBtn');
 
 function resetUATLayers() {
   uatLabelsGroup.clearLayers();
@@ -252,11 +251,6 @@ function resetUATLayers() {
     layerUAT = null;
   }
 }
-
-resetViewBtn.onclick = function() {
-  backBtn.onclick();
-};
-
 
 // ================== TRANSPARENT TOGGLE ==================
 var toggleTransparent = document.getElementById('toggle-transparent');
@@ -464,6 +458,7 @@ window.addEventListener('load', function() {
 });
 
 } // END init wrapper
+
 
 
 
