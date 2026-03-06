@@ -318,11 +318,12 @@ backBtn.onclick = function() {
   activeBaseLayer = blankLayer;
 
   // reset pozitie
-  if (isMobile) {
-    map.fitBounds([[43.5, 19.0], [48.5, 30.5]], { padding: [20, 20], animate: false });
-  } else {
-    map.setView([45.9, 24.9], 7, { animate: false });
-  }
+if (isMobile) {
+  map.setView([45.9, 24.9], 5.5, { animate: false });
+} else {
+  map.setView([45.9, 24.9], 7, { animate: false });
+}
+
 
   backBtn.style.display = 'none';
   history.pushState('', document.title, window.location.pathname);
@@ -478,6 +479,7 @@ window.addEventListener('load', function() {
 });
 
 } // END init wrapper
+
 
 
 
