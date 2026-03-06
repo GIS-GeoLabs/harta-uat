@@ -254,37 +254,7 @@ function resetUATLayers() {
 }
 
 resetViewBtn.onclick = function() {
-  uatActive = false;
-  resetUATLayers();
-  backBtn.style.display = 'none';
-  history.pushState('', document.title, window.location.pathname);
-
-  if (selectedJudetLayer) {
-    layerJudete.resetStyle(selectedJudetLayer);
-    selectedJudetLayer = null;
-  }
-
-  if (layerJudete && !map.hasLayer(layerJudete)) layerJudete.addTo(map);
-
-  // reset transparent checkbox
-  document.getElementById('toggle-transparent').checked = false;
-  if (layerJudete) {
-    layerJudete.eachLayer(function(l) { l.setStyle({ fillOpacity: 0.9 }); });
-  }
-
-  // reset fundal la blank
-  map.removeLayer(osmLayer);
-  map.removeLayer(satelliteLayer);
-  map.removeLayer(blankLayer);
-  blankLayer.addTo(map);
-  activeBaseLayer = blankLayer;
-
-if (isMobile) {
-  map.fitBounds([[43.5, 19.0], [48.5, 30.5]], { padding: [20, 20], animate: false });
-} else {
-  map.setView([45.9, 24.9], 7, { animate: false });
-}
-  map.getContainer().classList.add('labels-hidden');
+  backBtn.onclick();
 };
 
 
@@ -308,6 +278,42 @@ if (toggleTransparent) {
     }
   });
 }
+// ================== BACK BUTTON ==================
+backBtn.onclick = function() {
+  uatActive = false;
+  resetUATLayers();
+
+  if (selectedJudetLayer) {
+    layerJudete.resetStyle(selectedJudetLayer);
+    selectedJudetLayer = null;
+  }
+
+  if (layerJudete && !map.hasLayer(layerJudete)) layerJudete.addTo(map);
+
+  // reset transparenta
+  document.getElementById('toggle-transparent').checked = false;
+  if (layerJudete) {
+    layerJudete.eachLayer(function(l) { l.setStyle({ fillOpacity: 0.9 }); });
+  }
+
+  // reset fundal la blank
+  map.removeLayer(osmLayer);
+  map.removeLayer(satelliteLayer);
+  map.removeLayer(blankLayer);
+  blankLayer.addTo(map);
+  activeBaseLayer = blankLayer;
+
+  // reset pozitie
+  if (isMobile) {
+    map.fitBounds([[43.5, 19.0], [48.5, 30.5]], { padding: [20, 20], animate: false });
+  } else {
+    map.setView([45.9, 24.9], 7, { animate: false });
+  }
+
+  backBtn.style.display = 'none';
+  history.pushState('', document.title, window.location.pathname);
+  map.getContainer().classList.add('labels-hidden');
+};
 
 // ================== JUDETE ==================
 fetch(BASE_ROOT + 'judete.geojson')
@@ -458,6 +464,7 @@ window.addEventListener('load', function() {
 });
 
 } // END init wrapper
+
 
 
 
