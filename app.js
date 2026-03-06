@@ -256,22 +256,28 @@ resetViewBtn.onclick = function() {
 
   if (selectedJudetLayer) {
     layerJudete.resetStyle(selectedJudetLayer);
-    if (document.getElementById('toggle-transparent').checked) {
-      selectedJudetLayer.setStyle({ fillOpacity: 0 });
-    }
     selectedJudetLayer = null;
   }
 
   if (layerJudete && !map.hasLayer(layerJudete)) layerJudete.addTo(map);
 
+  // reset transparent checkbox
+  document.getElementById('toggle-transparent').checked = false;
+  if (layerJudete) {
+    layerJudete.eachLayer(function(l) { l.setStyle({ fillOpacity: 0.9 }); });
+  }
+
+  // reset fundal la blank
   map.removeLayer(osmLayer);
   map.removeLayer(satelliteLayer);
   map.removeLayer(blankLayer);
-  activeBaseLayer.addTo(map);
+  blankLayer.addTo(map);
+  activeBaseLayer = blankLayer;
 
   map.setView([45.9, 24.9], 7, { animate: false });
   map.getContainer().classList.add('labels-hidden');
 };
+
 
 document.getElementById('toggle-transparent').addEventListener('change', function() {
   var transparent = this.checked;
@@ -448,3 +454,4 @@ if (typeof ResizeObserver !== 'undefined') {
 }
 
 } // END init wrapper
+
