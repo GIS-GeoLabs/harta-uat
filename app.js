@@ -1,9 +1,7 @@
 // ================== INIT WRAPPER ==================
-if (document.getElementById('apysis-map')) {
-
 var BASE_ROOT;
 if (window.location.hostname === 'gis-geolabs.github.io') {
-  BASE_ROOT = '/harta-uat/search/gis/';
+  BASE_ROOT = '/harta-uat/';
 } else {
   BASE_ROOT = (document.getElementById('apysis-map').getAttribute('data-base-root') || '').replace(/\/$/, '') + '/';
 }
@@ -474,6 +472,7 @@ if (typeof ResizeObserver !== 'undefined') {
 }
 
 } // END init wrapper
+
 
 
 
