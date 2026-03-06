@@ -314,32 +314,34 @@ if (toggleTransparent) {
 
 
 // ================== RESET ==================
-backBtn.onclick = function() {
-  uatActive = false;
-  resetUATLayers();
+uatActive = false;
+resetUATLayers();
 
-  if (selectedJudetLayer) {
-    layerJudete.resetStyle(selectedJudetLayer);
-    if (document.getElementById('toggle-transparent').checked) {
-      selectedJudetLayer.setStyle({ fillOpacity: 0 });
-    }
-    selectedJudetLayer = null;
-  }
-  if (layerJudete && !map.hasLayer(layerJudete)) layerJudete.addTo(map);
-  map.removeLayer(osmLayer);
-  map.removeLayer(satelliteLayer);
-  map.removeLayer(blankLayer);
-  activeBaseLayer.addTo(map);
+if (selectedJudetLayer) {
+  layerJudete.resetStyle(selectedJudetLayer);
+  selectedJudetLayer = null;
+}
+if (layerJudete && !map.hasLayer(layerJudete)) layerJudete.addTo(map);
+
+// ← AICI NOUL RESET COMPLET
+document.getElementById('toggle-transparent').checked = false;
+layerJudete.eachLayer(function(layer) { layer.setStyle({ fillOpacity: 0.9 }); });
+map.removeLayer(osmLayer);
+map.removeLayer(satelliteLayer);
+map.removeLayer(blankLayer);
+blankLayer.addTo(map);
+activeBaseLayer = blankLayer;
 
 if (isMobile) {
   map.fitBounds([[43.5, 19.0], [48.5, 30.5]], { padding: [20, 20], animate: false });
 } else {
   map.setView([45.9, 24.9], 7, { animate: false });
 }
-  backBtn.style.display = 'none';
-  history.pushState('', document.title, window.location.pathname);
-  map.getContainer().classList.add('labels-hidden');
-};
+
+backBtn.style.display = 'none';
+history.pushState('', document.title, window.location.pathname);
+map.getContainer().classList.add('labels-hidden');
+
 
 // ================== JUDETE ==================
 fetch(BASE_ROOT + 'judete.geojson')
@@ -478,7 +480,7 @@ if (typeof ResizeObserver !== 'undefined') {
 window.addEventListener('hashchange', function() {
   var hash = window.location.hash.replace('#', '');
   if (hash === '') {
-    backBtn.onclick();
+    backBtn.onclick();  // ← apelează același reset complet
   }
 });
 
@@ -490,6 +492,7 @@ window.addEventListener('load', function() {
 });
 
 } // END init wrapper
+
 
 
 
