@@ -149,11 +149,14 @@ var romaniaBounds = L.latLngBounds([43.5, 19.0], [48.5, 30.5]);
 var isMobile = window.innerWidth < 768;
 
 var map = L.map('apysis-map', {
-  minZoom: 6,
+  minZoom: 5,
   maxZoom: 18,
   maxBounds: romaniaBounds,
   maxBoundsViscosity: 1.0
-}).setView([45.9, 24.9], isMobile ? 6 : 7);
+}).setView([45.9, 24.9], 7);
+  if (isMobile) {
+  map.fitBounds([[43.5, 19.0], [48.5, 30.5]], { padding: [20, 20] });
+}
 
 
 // ================== BASE LAYERS ==================
@@ -463,6 +466,7 @@ if (typeof ResizeObserver !== 'undefined') {
 }
 
 } // END init wrapper
+
 
 
 
