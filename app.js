@@ -280,7 +280,11 @@ resetViewBtn.onclick = function() {
   blankLayer.addTo(map);
   activeBaseLayer = blankLayer;
 
+if (isMobile) {
+  map.fitBounds([[43.5, 19.0], [48.5, 30.5]], { padding: [20, 20], animate: false });
+} else {
   map.setView([45.9, 24.9], 7, { animate: false });
+}
   map.getContainer().classList.add('labels-hidden');
 };
 
@@ -326,7 +330,11 @@ backBtn.onclick = function() {
   map.removeLayer(blankLayer);
   activeBaseLayer.addTo(map);
 
+if (isMobile) {
+  map.fitBounds([[43.5, 19.0], [48.5, 30.5]], { padding: [20, 20], animate: false });
+} else {
   map.setView([45.9, 24.9], 7, { animate: false });
+}
   backBtn.style.display = 'none';
   map.getContainer().classList.add('labels-hidden');
 };
@@ -466,6 +474,7 @@ if (typeof ResizeObserver !== 'undefined') {
 }
 
 } // END init wrapper
+
 
 
 
