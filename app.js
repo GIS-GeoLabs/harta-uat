@@ -259,6 +259,7 @@ resetViewBtn.onclick = function() {
   uatActive = false;
   resetUATLayers();
   backBtn.style.display = 'none';
+  history.pushState('', document.title, window.location.pathname);
 
   if (selectedJudetLayer) {
     layerJudete.resetStyle(selectedJudetLayer);
@@ -336,6 +337,7 @@ if (isMobile) {
   map.setView([45.9, 24.9], 7, { animate: false });
 }
   backBtn.style.display = 'none';
+  history.pushState('', document.title, window.location.pathname);
   map.getContainer().classList.add('labels-hidden');
 };
 
@@ -381,6 +383,7 @@ layer.setStyle({ weight: 5, color: '#000', fillOpacity: document.getElementById(
     if (map.getZoom() < 9) map.setZoom(9, { animate: false });
   }
   afiseazaUAT(feature.properties.Judet);
+  window.location.hash = norm(feature.properties.Judet);
 });
 
 
@@ -472,8 +475,22 @@ if (typeof ResizeObserver !== 'undefined') {
     map.invalidateSize();
   }).observe(document.getElementById('apysis-map'));
 }
+window.addEventListener('hashchange', function() {
+  var hash = window.location.hash.replace('#', '');
+  if (hash === '') {
+    backBtn.onclick();
+  }
+});
+
+window.addEventListener('load', function() {
+  var hash = window.location.hash.replace('#', '');
+  if (hash !== '') {
+    afiseazaUAT(hash);
+  }
+});
 
 } // END init wrapper
+
 
 
 
