@@ -260,6 +260,7 @@ var layerJudete = null, layerUAT = null;
 var uatLabels = [], uatLabelsGroup = L.layerGroup();
 var selectedJudetLayer = null;
 var backBtn = document.getElementById('backBtn');
+  var toggleTransparent = document.getElementById('toggle-transparent');
 
 function resetUATLayers() {
   uatLabelsGroup.clearLayers();
@@ -325,7 +326,7 @@ if (isMobile) {
 }
 
 
-  // backBtn.style.display = 'none';
+  backBtn.style.display = 'none';
   history.pushState('', document.title, window.location.pathname);
   map.getContainer().classList.add('labels-hidden');
 };
@@ -479,6 +480,7 @@ window.addEventListener('load', function() {
 });
 
 } // END init wrapper
+
 
 
 
