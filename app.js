@@ -325,7 +325,7 @@ if (isMobile) {
 }
 
 
-  backBtn.style.display = 'none';
+  // backBtn.style.display = 'none';
   history.pushState('', document.title, window.location.pathname);
   map.getContainer().classList.add('labels-hidden');
 };
@@ -479,6 +479,7 @@ window.addEventListener('load', function() {
 });
 
 } // END init wrapper
+
 
 
 
